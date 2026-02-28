@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile within the HireNexus application, linked to Firebase Authentication.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique Firebase UID."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL to the user's profile picture.",
+          "format": "uri"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "JobDescription": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "JobDescription",
+      "type": "object",
+      "description": "Stores details about a job description.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "department": { "type": "string" },
+        "level": { "type": "string" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "descriptionText": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title"]
+    },
+    "Candidate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Candidate",
+      "type": "object",
+      "description": "Stores details about a job candidate.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "role": { "type": "string" },
+        "githubUrl": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["New", "Reviewing", "In Debate", "Completed"] },
+        "hasResume": { "type": "boolean" },
+        "hasAudio": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "evaluationId": { "type": "string" }
+      },
+      "required": ["userId", "fullName", "role"]
+    },
+    "Evaluation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Evaluation",
+      "type": "object",
+      "description": "Stores the result of an AI panel evaluation.",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "candidateId": { "type": "string" },
+        "candidateName": { "type": "string" },
+        "recommendation": { "type": "string" },
+        "confidenceScore": { "type": "number" },
+        "transcript": { "type": "array", "items": { "type": "object" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "candidateId", "recommendation"]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/backend/entities/UserProfile" },
+      "description": "Stores individual user profiles."
+    },
+    "/users/{userId}/jobDescriptions/{jobId}": {
+      "schema": { "$ref": "#/backend/entities/JobDescription" },
+      "description": "Jobs created by the user."
+    },
+    "/users/{userId}/candidates/{candidateId}": {
+      "schema": { "$ref": "#/backend/entities/Candidate" },
+      "description": "Candidates managed by the user."
+    },
+    "/users/{userId}/evaluations/{evaluationId}": {
+      "schema": { "$ref": "#/backend/entities/Evaluation" },
+      "description": "AI Evaluations results."
+    }
+  }
+}
