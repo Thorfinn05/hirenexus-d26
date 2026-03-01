@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { 
-  Users, 
-  BrainCircuit, 
-  CheckCircle2, 
-  TrendingUp, 
-  Clock, 
+import {
+  Users,
+  BrainCircuit,
+  CheckCircle2,
+  TrendingUp,
+  Clock,
   ArrowRight,
   Filter,
   Loader2
@@ -27,30 +27,32 @@ export default function Dashboard() {
     return collection(db, "users", user.uid, "candidates")
   }, [db, user?.uid])
 
-  const recentEvalsQuery = useMemoFirebase(() => {
-    if (!db || !user?.uid) return null
-    // Changed "Completed" to "Evaluated" to match the deliberation engine's output status
-    return query(
-      collection(db, "users", user.uid, "candidates"), 
-      where("status", "in", ["Evaluated", "In Debate"]),
-      orderBy("createdAt", "desc"), 
-      limit(5)
-    )
-  }, [db, user?.uid])
-
   const { data: candidates, isLoading: isCandidatesLoading } = useCollection(candidatesQuery)
-  const { data: recentEvals, isLoading: isEvalsLoading } = useCollection(recentEvalsQuery)
+
+  const recentEvals = React.useMemo(() => {
+    if (!candidates) return []
+    return candidates
+      .filter(c => c.status === "Evaluated" || c.status === "In Debate")
+      .sort((a, b) => {
+        const dateA = a.createdAt instanceof Timestamp ? a.createdAt.toDate() : new Date(a.createdAt || 0)
+        const dateB = b.createdAt instanceof Timestamp ? b.createdAt.toDate() : new Date(b.createdAt || 0)
+        return dateB.getTime() - dateA.getTime()
+      })
+      .slice(0, 5)
+  }, [candidates])
+
+  const isEvalsLoading = isCandidatesLoading
 
   // Derived Metrics
   const metrics = React.useMemo(() => {
     if (!candidates) return []
-    
+
     const activeEvals = candidates.filter(c => c.status === "In Debate").length
     const pendingReviews = candidates.filter(c => c.status === "New" || c.status === "Reviewing").length
-    
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
+
     const completedToday = candidates.filter(c => {
       // Logic now checks for "Evaluated" status
       if (c.status !== "Evaluated" || !c.createdAt) return false
@@ -160,9 +162,9 @@ export default function Dashboard() {
             <div className="space-y-1">
               {recentEvals && recentEvals.length > 0 ? (
                 recentEvals.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-all group cursor-pointer border border-transparent hover:border-border/60" 
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-4 rounded-xl hover:bg-muted/30 transition-all group cursor-pointer border border-transparent hover:border-border/60"
                     onClick={() => {
                       if (item.status === 'Evaluated') {
                         window.location.href = `/reports/${item.id}`
@@ -182,11 +184,11 @@ export default function Dashboard() {
                     </div>
                     <div className="flex items-center gap-8">
                       <Badge className={
-                        item.status === "Evaluated" 
-                          ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20" 
+                        item.status === "Evaluated"
+                          ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
                           : item.status === "In Debate"
-                          ? "bg-primary/10 text-primary border-primary/20 animate-pulse"
-                          : "bg-orange-400/10 text-orange-400 border-orange-400/20"
+                            ? "bg-primary/10 text-primary border-primary/20 animate-pulse"
+                            : "bg-orange-400/10 text-orange-400 border-orange-400/20"
                       }>
                         {item.status}
                       </Badge>
