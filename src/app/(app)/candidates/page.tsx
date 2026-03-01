@@ -16,7 +16,8 @@ import {
   Trash2,
   Edit2,
   StickyNote,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -49,6 +50,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, addDoc, serverTimestamp, query, orderBy, doc, deleteDoc, updateDoc } from "firebase/firestore"
 import { useForm } from "react-hook-form"
@@ -74,6 +76,7 @@ const candidateFormSchema = z.object({
 type CandidateFormValues = z.infer<typeof candidateFormSchema>
 
 export default function CandidatesPage() {
+  const router = useRouter()
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
@@ -87,6 +90,10 @@ export default function CandidatesPage() {
   const [noteText, setNoteText] = React.useState("")
   const [csvFile, setCsvFile] = React.useState<File | null>(null)
   const [importProgress, setImportProgress] = React.useState<{ current: number, total: number, status: string } | null>(null)
+
+  const [bulkImportStep, setBulkImportStep] = React.useState<"upload" | "target">("upload")
+  const [importedCandidateIds, setImportedCandidateIds] = React.useState<string[]>([])
+  const [hireTarget, setHireTarget] = React.useState<string>("1")
 
   const resumeInputRef = React.useRef<HTMLInputElement>(null)
   const audioInputRef = React.useRef<HTMLInputElement>(null)
@@ -214,6 +221,7 @@ export default function CandidatesPage() {
       setImportProgress({ current: 0, total: parsedCandidates.length, status: 'Importing candidates...' })
 
       let importedCount = 0;
+      let importedIds: string[] = [];
       for (const candidate of parsedCandidates) {
         importedCount++;
         setImportProgress({ current: importedCount, total: parsedCandidates.length, status: `Importing ${candidate.fullName}...` })
@@ -234,7 +242,7 @@ export default function CandidatesPage() {
           }
         }
 
-        await addDoc(collection(db, "users", user.uid, "candidates"), {
+        const docRef = await addDoc(collection(db, "users", user.uid, "candidates"), {
           fullName: candidate.fullName,
           email: candidate.email,
           phone: "",
@@ -251,11 +259,12 @@ export default function CandidatesPage() {
           status: status,
           createdAt: serverTimestamp(),
         })
+        importedIds.push(docRef.id);
       }
 
-      toast({ title: "Bulk Import Complete", description: `Successfully imported ${importedCount} candidates.` })
-      setIsAddDialogOpen(false)
-      setCsvFile(null)
+      setImportedCandidateIds(importedIds);
+      setBulkImportStep("target");
+      toast({ title: "Bulk Import Complete", description: `Successfully imported ${importedCount} candidates. Please set your hiring target.` })
     } catch (error: any) {
       toast({ variant: "destructive", title: "Bulk Import Failed", description: error.message || "Failed to import candidates." })
     } finally {
@@ -358,14 +367,21 @@ export default function CandidatesPage() {
           <p className="text-muted-foreground">Manage your applicants and initiate multi-modal AI screening.</p>
         </div>
 
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+          setIsAddDialogOpen(open)
+          if (!open) {
+            setBulkImportStep("upload")
+            setImportedCandidateIds([])
+            setHireTarget("1")
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 font-bold">
               <Plus className="h-4 w-4" />
               Add Candidate
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+          <DialogContent className="sm:max-w-3xl border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
             <Tabs defaultValue="single" className="w-full">
               <div className="p-6 pb-2">
                 <DialogHeader>
@@ -470,49 +486,88 @@ export default function CandidatesPage() {
               </TabsContent>
 
               <TabsContent value="bulk" className="m-0 border-none outline-none">
-                <div className="p-6 pt-2 space-y-6 max-h-[70vh] overflow-y-auto">
-                  <div className="space-y-4">
-                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
-                      <h4 className="font-bold text-sm text-primary mb-2 flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" /> CSV Format Requirements
-                      </h4>
-                      <p className="text-xs text-muted-foreground">
-                        Your CSV should include columns for Name, Email, Role, Resume URL, and GitHub URL.
-                        The AI will automatically identify the right fields, but headers help.
-                      </p>
-                    </div>
+                {bulkImportStep === "upload" ? (
+                  <>
+                    <div className="p-6 pt-2 space-y-6 max-h-[70vh] overflow-y-auto">
+                      <div className="space-y-4">
+                        <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
+                          <h4 className="font-bold text-sm text-primary mb-2 flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4" /> CSV Format Requirements
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            Your CSV should include columns for Name, Email, Role, Resume URL, and GitHub URL.
+                            The AI will automatically identify the right fields, but headers help.
+                          </p>
+                        </div>
 
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-bold">Candidates Data (CSV) *</Label>
-                      <input type="file" accept=".csv" className="hidden" ref={csvInputRef} onChange={handleCsvFileChange} />
-                      <div onClick={() => csvInputRef.current?.click()} className={`w-full flex items-center justify-center flex-col gap-3 p-8 rounded-xl border-2 border-dashed transition-all cursor-pointer ${csvFile ? "bg-primary/10 border-primary text-primary" : "bg-muted/10 border-border/60 text-muted-foreground hover:border-muted-foreground/40"}`}>
-                        {csvFile ? <FileCheck className="h-8 w-8" /> : <FileText className="h-8 w-8 opacity-50" />}
-                        <span className="text-sm font-bold">{csvFile ? csvFile.name : "Click to select a CSV file"}</span>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-bold">Candidates Data (CSV) *</Label>
+                          <input type="file" accept=".csv" className="hidden" ref={csvInputRef} onChange={handleCsvFileChange} />
+                          <div onClick={() => csvInputRef.current?.click()} className={`w-full flex items-center justify-center flex-col gap-3 p-8 rounded-xl border-2 border-dashed transition-all cursor-pointer ${csvFile ? "bg-primary/10 border-primary text-primary" : "bg-muted/10 border-border/60 text-muted-foreground hover:border-muted-foreground/40"}`}>
+                            {csvFile ? <FileCheck className="h-8 w-8" /> : <FileText className="h-8 w-8 opacity-50" />}
+                            <span className="text-sm font-bold">{csvFile ? csvFile.name : "Click to select a CSV file"}</span>
+                          </div>
+                        </div>
+
+                        {importProgress && (
+                          <div className="space-y-2 mt-6">
+                            <div className="flex justify-between text-xs font-medium">
+                              <span className="text-muted-foreground">{importProgress.status}</span>
+                              {importProgress.total > 0 && <span className="font-bold">{importProgress.current} / {importProgress.total}</span>}
+                            </div>
+                            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                              <div
+                                className="bg-primary h-full transition-all duration-300"
+                                style={{ width: importProgress.total > 0 ? `${(importProgress.current / importProgress.total) * 100}%` : '5%' }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-
-                    {importProgress && (
-                      <div className="space-y-2 mt-6">
-                        <div className="flex justify-between text-xs font-medium">
-                          <span className="text-muted-foreground">{importProgress.status}</span>
-                          {importProgress.total > 0 && <span className="font-bold">{importProgress.current} / {importProgress.total}</span>}
+                    <DialogFooter className="p-6 bg-muted/20 border-t border-border/40 gap-3">
+                      <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmitting} className="font-bold border border-border/40">Cancel</Button>
+                      <Button onClick={onSubmitBulk} disabled={!csvFile || isSubmitting} className="bg-primary text-primary-foreground font-bold px-8 shadow-lg shadow-primary/20 gap-2">
+                        {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</> : <><Upload className="h-4 w-4" /> Bulk Import</>}
+                      </Button>
+                    </DialogFooter>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-6 pt-2 space-y-6 max-h-[70vh] overflow-y-auto">
+                      <div className="space-y-4 text-center py-8">
+                        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 mb-4">
+                          <CheckCircle2 className="h-8 w-8" />
                         </div>
-                        <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                          <div
-                            className="bg-primary h-full transition-all duration-300"
-                            style={{ width: importProgress.total > 0 ? `${(importProgress.current / importProgress.total) * 100}%` : '5%' }}
+                        <h3 className="text-2xl font-bold font-headline">Candidates Imported Successfully!</h3>
+                        <p className="text-muted-foreground max-w-md mx-auto">
+                          {importedCandidateIds.length} candidates have been added to your pipeline and are ready for AI evaluation.
+                        </p>
+
+                        <div className="mt-8 max-w-sm mx-auto space-y-3 text-left pt-6 border-t border-border/40">
+                          <Label className="text-sm font-bold">Total no. of candidates to hire</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            max={importedCandidateIds.length}
+                            value={hireTarget}
+                            onChange={(e) => setHireTarget(e.target.value)}
+                            className="text-lg text-center h-12 bg-muted/20 border-border/40 font-bold"
                           />
                         </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-                <DialogFooter className="p-6 bg-muted/20 border-t border-border/40 gap-3">
-                  <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmitting} className="font-bold border border-border/40">Cancel</Button>
-                  <Button onClick={onSubmitBulk} disabled={!csvFile || isSubmitting} className="bg-primary text-primary-foreground font-bold px-8 shadow-lg shadow-primary/20 gap-2">
-                    {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</> : <><Upload className="h-4 w-4" /> Bulk Import</>}
-                  </Button>
-                </DialogFooter>
+                    </div>
+                    <DialogFooter className="p-6 bg-muted/20 border-t border-border/40 gap-3">
+                      <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="font-bold border border-border/40">Finish Later</Button>
+                      <Button onClick={() => {
+                        setIsAddDialogOpen(false);
+                        router.push(`/evaluate/bulk?ids=${importedCandidateIds.join(",")}&hireCount=${hireTarget}`);
+                      }} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 shadow-lg shadow-primary/20 gap-2">
+                        <Play className="h-4 w-4 fill-current" /> Launch AI Panel for All
+                      </Button>
+                    </DialogFooter>
+                  </>
+                )}
               </TabsContent>
             </Tabs>
           </DialogContent>

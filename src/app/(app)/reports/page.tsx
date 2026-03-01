@@ -1,9 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { 
-  FileText, 
-  Search, 
+import {
+  FileText,
+  Search,
   MoreHorizontal,
   ArrowUpRight,
   Filter,
@@ -61,9 +61,9 @@ export default function ReportsListPage() {
           <div className="p-4 border-b border-border/40 flex items-center justify-between gap-4">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search candidates or roles..." 
-                className="pl-9 bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary/50" 
+              <Input
+                placeholder="Search candidates or roles..."
+                className="pl-9 bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary/50"
               />
             </div>
             <Button variant="ghost" size="sm" className="text-muted-foreground gap-2">
@@ -71,7 +71,7 @@ export default function ReportsListPage() {
               Filter
             </Button>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
