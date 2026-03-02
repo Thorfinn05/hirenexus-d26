@@ -2,12 +2,12 @@
 
 import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
-import { 
-  BrainCircuit, 
-  Code2, 
-  UserRoundCheck, 
-  Heart, 
-  ShieldCheck, 
+import {
+  BrainCircuit,
+  Code2,
+  UserRoundCheck,
+  Heart,
+  ShieldCheck,
   ChevronRight,
   Loader2,
   CheckCircle2,
@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { aiDebateStreaming, DebateEvent } from "@/ai/flows/ai-debate-streaming-flow"
+import { fetchGithubProfile } from "@/ai/flows/fetch-github-profile-flow"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs, limit } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -45,7 +46,7 @@ export default function EvaluationPage() {
   const { user } = useUser()
   const db = useFirestore()
   const { toast } = useToast()
-  
+
   const [events, setEvents] = React.useState<DebateEvent[]>([])
   const [isDebating, setIsDebating] = React.useState(false)
   const [completed, setCompleted] = React.useState(false)
@@ -60,7 +61,7 @@ export default function EvaluationPage() {
 
   const startEvaluation = async () => {
     if (!candidate || !user?.uid || !db) return
-    
+
     setIsDebating(true)
     setEvents([])
     setCompleted(false)
@@ -75,15 +76,21 @@ export default function EvaluationPage() {
       // Update candidate status to indicate evaluation is starting
       await updateDoc(candidateRef!, { status: "In Debate" })
 
+      let fetchedGithubData = undefined;
+      if (candidate.githubUrl) {
+        fetchedGithubData = await fetchGithubProfile(candidate.githubUrl);
+      }
+
       // 2. Prepare detailed data for the debate engine
       const debateInput = {
         candidateName: candidate.fullName,
         candidateId: id as string,
         resumeText: candidate.notes || "Standard professional resume content.",
         githubUrl: candidate.githubUrl || undefined,
+        githubData: fetchedGithubData,
         portfolioData: candidate.portfolioUrl ? `Personal Portfolio: ${candidate.portfolioUrl}` : "Portfolio evidence derived from resume and projects.",
-        interviewTranscript: candidate.hasAudio 
-          ? `[Audio Interview Transcription]: Candidate discusses their architectural approach, conflict resolution strategies, and interest in the ${candidate.role} role. They highlight their proficiency in relevant tech stacks.` 
+        interviewTranscript: candidate.hasAudio
+          ? `[Audio Interview Transcription]: Candidate discusses their architectural approach, conflict resolution strategies, and interest in the ${candidate.role} role. They highlight their proficiency in relevant tech stacks.`
           : "Recruiter notes indicate strong communication and clear technical explanations.",
         jobTitle: candidate.role,
         jobDescription: jobData?.descriptionText || "Senior role requiring high autonomy and technical leadership.",
@@ -97,13 +104,13 @@ export default function EvaluationPage() {
       for (let i = 0; i < result.debateTranscript.length; i++) {
         const event = result.debateTranscript[i];
         // Round changes get a slightly longer pause for dramatic effect
-        const isRoundChange = i > 0 && event.round !== result.debateTranscript[i-1].round;
+        const isRoundChange = i > 0 && event.round !== result.debateTranscript[i - 1].round;
         const delay = isRoundChange ? 2500 : 1500;
-        
+
         await new Promise(resolve => setTimeout(resolve, delay))
         setEvents(prev => [...prev, event])
       }
-      
+
       // 5. Save final result to evaluations collection
       const evalId = `eval-${id}`
       await setDoc(doc(db, "users", user.uid, "evaluations", evalId), {
@@ -119,7 +126,7 @@ export default function EvaluationPage() {
 
       // 6. Update candidate final status
       await updateDoc(candidateRef!, { status: "Evaluated", evaluationId: evalId })
-      
+
       setCompleted(true)
       toast({
         title: "Consensus Reached",
@@ -209,7 +216,7 @@ export default function EvaluationPage() {
                   {events.map((event, i) => {
                     const Icon = agentIcons[event.agentName] || ShieldCheck
                     const colorClass = agentColors[event.agentName] || "text-foreground"
-                    
+
                     return (
                       <div key={i} className="flex gap-4 group animate-in slide-in-from-bottom-3 fade-in duration-700">
                         <div className={`shrink-0 h-11 w-11 rounded-2xl bg-muted/40 border border-border/40 flex items-center justify-center ${colorClass} shadow-inner`}>
@@ -293,11 +300,10 @@ export default function EvaluationPage() {
                   return (
                     <div key={i} className="flex gap-3 relative">
                       {i !== 2 && <div className={`absolute left-[11px] top-[26px] bottom-[-24px] w-px ${isDone ? "bg-emerald-500/40" : "bg-border/40"}`} />}
-                      <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 z-10 border-2 ${
-                        isDone ? "bg-emerald-500 border-emerald-400/20 text-white" : 
-                        isCurrent ? "bg-primary border-primary/20 animate-pulse text-white shadow-lg shadow-primary/20" : "bg-muted border-border/60 text-muted-foreground"
-                      }`}>
-                        {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : <span className="text-[10px] font-bold">{i+1}</span>}
+                      <div className={`h-6 w-6 rounded-full flex items-center justify-center shrink-0 z-10 border-2 ${isDone ? "bg-emerald-500 border-emerald-400/20 text-white" :
+                          isCurrent ? "bg-primary border-primary/20 animate-pulse text-white shadow-lg shadow-primary/20" : "bg-muted border-border/60 text-muted-foreground"
+                        }`}>
+                        {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : <span className="text-[10px] font-bold">{i + 1}</span>}
                       </div>
                       <div className="flex flex-col gap-0.5">
                         <span className={`text-[11px] font-bold ${!isCurrent && !isDone ? "text-muted-foreground/60" : "text-foreground"}`}>{step.label}</span>

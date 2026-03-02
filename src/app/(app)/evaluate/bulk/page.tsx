@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { aiDebateStreaming, DebateEvent } from "@/ai/flows/ai-debate-streaming-flow"
+import { fetchGithubProfile } from "@/ai/flows/fetch-github-profile-flow"
 import { useUser, useFirestore } from "@/firebase"
 import { doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs, limit } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -196,11 +197,17 @@ function BulkEvaluationContent() {
 
                 await updateDoc(candidateRef, { status: "In Debate" })
 
+                let fetchedGithubData = undefined;
+                if (candidate.githubUrl) {
+                    fetchedGithubData = await fetchGithubProfile(candidate.githubUrl);
+                }
+
                 const debateInput = {
                     candidateName: candidate.fullName,
                     candidateId: id,
                     resumeText: candidate.resumeText || candidate.notes || "Standard professional resume content.",
                     githubUrl: candidate.githubUrl || undefined,
+                    githubData: fetchedGithubData,
                     portfolioData: candidate.portfolioUrl ? `Personal Portfolio: ${candidate.portfolioUrl}` : "Portfolio evidence derived from resume and projects.",
                     interviewTranscript: candidate.hasAudio
                         ? `[Audio Interview Transcription]: Candidate discusses their approach.`

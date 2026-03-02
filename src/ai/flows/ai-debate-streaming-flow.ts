@@ -290,6 +290,7 @@ const AiDebateStreamingInputSchema = z.object({
   candidateId: z.string(),
   resumeText: z.string(),
   githubUrl: z.string().optional(),
+  githubData: z.string().optional(),
   portfolioData: z.string().optional(),
   interviewTranscript: z.string().optional(),
   jobTitle: z.string(),
@@ -422,7 +423,7 @@ const aiDebateStreamingFlow = ai.defineFlow(
 
     const dataBlock = `
       RESUME: ${input.resumeText}
-      GITHUB: ${input.githubUrl || 'None'}
+      GITHUB DATA: ${input.githubData || (input.githubUrl ? `Profile URL: ${input.githubUrl} (unparsed)` : 'None')}
       PORTFOLIO: ${input.portfolioData || 'None'}
       INTERVIEW: ${input.interviewTranscript || 'None'}
     `;
