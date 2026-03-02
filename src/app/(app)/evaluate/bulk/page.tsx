@@ -184,8 +184,8 @@ function BulkEvaluationContent() {
         })
         setCandidatesState(newState)
 
-        // Execute concurrently
-        const promises = Object.values(candidatesState).map(async (cs) => {
+        // Execute concurrently but gather results before saving
+        const evaluatePromises = Object.values(candidatesState).map(async (cs) => {
             const { id, candidate } = cs;
             const candidateRef = doc(db, "users", user.uid, "candidates", id);
 
@@ -238,6 +238,52 @@ function BulkEvaluationContent() {
                     })
                 }
 
+                return { id, candidate, result, error: null };
+            } catch (error) {
+                console.error(`Evaluation failed for ${candidate.fullName}`, error)
+                return { id, candidate, result: null, error };
+            }
+        });
+
+        const rawResults = await Promise.all(evaluatePromises);
+
+        // Apply target hire count logic (override confidence & recommendation)
+        const targetHireCount = hireCountParam ? parseInt(hireCountParam, 10) : 0;
+
+        if (targetHireCount > 0) {
+            // Filter to successful evaluations
+            const successfulResults = rawResults.filter(r => !r.error && r.result);
+            // Sort by confidence score descending
+            successfulResults.sort((a, b) => b.result!.confidenceScore - a.result!.confidenceScore);
+
+            let hireCountSoFar = 0;
+            for (const item of successfulResults) {
+                const rec = item.result!.finalRecommendation;
+                if (rec === "Recommend Hiring" || rec === "Hire") {
+                    if (hireCountSoFar < targetHireCount) {
+                        item.result!.confidenceScore = 100;
+                        hireCountSoFar++;
+                    } else {
+                        item.result!.finalRecommendation = "Backup Candidate";
+                        item.result!.confidenceScore = Math.min(item.result!.confidenceScore, 85);
+                    }
+                }
+            }
+        }
+
+        // Save adjusted results to DB
+        for (const item of rawResults) {
+            const { id, candidate, result, error } = item;
+
+            if (error || !result) {
+                setCandidatesState(prev => ({
+                    ...prev,
+                    [id]: { ...prev[id], isDebating: false, completed: true, result: "Error" }
+                }));
+                continue;
+            }
+
+            try {
                 const evalId = `eval-${id}`
                 await setDoc(doc(db, "users", user.uid, "evaluations", evalId), {
                     id: evalId,
@@ -250,6 +296,7 @@ function BulkEvaluationContent() {
                     createdAt: serverTimestamp(),
                 })
 
+                const candidateRef = doc(db, "users", user.uid, "candidates", id);
                 await updateDoc(candidateRef, { status: "Evaluated", evaluationId: evalId })
 
                 setCandidatesState(prev => ({
@@ -261,16 +308,14 @@ function BulkEvaluationContent() {
                         result: result.finalRecommendation
                     }
                 }))
-            } catch (error) {
-                console.error(`Evaluation failed for ${candidate.fullName}`, error)
+            } catch (dbError) {
+                console.error(`DB save failed for ${candidate.fullName}`, dbError)
                 setCandidatesState(prev => ({
                     ...prev,
                     [id]: { ...prev[id], isDebating: false, completed: true, result: "Error" }
                 }))
             }
-        });
-
-        await Promise.all(promises);
+        }
         setIsBulkDebating(false)
         setBulkCompleted(true)
         toast({ title: "Bulk Evaluation Completed", description: "All candidates have been evaluated." })
