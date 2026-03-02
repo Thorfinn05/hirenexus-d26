@@ -6,8 +6,11 @@ import { UserProfileSynchronizer } from '@/components/user-profile-synchronizer'
 import { Chatbot } from '@/components/chatbot';
 
 export const metadata: Metadata = {
-  title: 'HireNexus | Multi-Agent AI Hiring Evaluation',
+  title: 'HireNexus',
   description: 'Transparent multi-agent AI hiring evaluation platform.',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({

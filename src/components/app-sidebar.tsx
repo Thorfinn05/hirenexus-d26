@@ -44,8 +44,8 @@ export function AppSidebar() {
     <Sidebar className="border-r border-border/40 bg-card/30" collapsible="icon">
       <SidebarHeader className="p-4 h-16 flex items-center">
         <Link href="/dashboard" className="flex items-center gap-3 w-full">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-            <BrainCircuit className="h-6 w-6 text-primary-foreground" />
+          <div className="h-10 w-10 flex items-center justify-center shrink-0 overflow-hidden rounded-full border border-primary/20 bg-background">
+            <img src="/logo.png" alt="HireNexus Logo" className="h-full w-full object-cover" />
           </div>
           <span className="font-bold text-xl tracking-tighter font-headline group-data-[state=collapsed]:hidden overflow-hidden whitespace-nowrap">
             HireNexus
@@ -68,8 +68,8 @@ export function AppSidebar() {
                       isActive={isActive}
                       tooltip={item.name}
                       className={`w-full justify-start gap-4 px-3 py-6 rounded-xl transition-all duration-300 ${isActive
-                          ? "bg-primary/15 text-primary shadow-[0_0_15px_rgba(70,136,238,0.1)]"
-                          : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                        ? "bg-primary/15 text-primary shadow-[0_0_15px_rgba(70,136,238,0.1)]"
+                        : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                         }`}
                     >
                       <Link href={item.href}>
@@ -179,13 +179,13 @@ export function AppSidebar() {
 //                 const isActive = pathname === item.href
 //                 return (
 //                   <SidebarMenuItem key={item.name}>
-//                     <SidebarMenuButton 
-//                       asChild 
+//                     <SidebarMenuButton
+//                       asChild
 //                       isActive={isActive}
 //                       tooltip={item.name}
 //                       className={`w-full justify-start gap-4 px-3 py-6 rounded-xl transition-all duration-300 ${
-//                         isActive 
-//                           ? "bg-primary/15 text-primary shadow-[0_0_15px_rgba(70,136,238,0.1)]" 
+//                         isActive
+//                           ? "bg-primary/15 text-primary shadow-[0_0_15px_rgba(70,136,238,0.1)]"
 //                           : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
 //                       }`}
 //                     >
@@ -209,8 +209,8 @@ export function AppSidebar() {
 //             <SidebarMenu className="px-2 gap-1.5">
 //               {systemItems.map((item) => (
 //                 <SidebarMenuItem key={item.name}>
-//                   <SidebarMenuButton 
-//                     asChild 
+//                   <SidebarMenuButton
+//                     asChild
 //                     tooltip={item.name}
 //                     className="w-full justify-start gap-4 px-3 py-6 rounded-xl text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-300"
 //                   >

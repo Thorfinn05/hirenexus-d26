@@ -41,9 +41,9 @@ export function UserNav() {
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full border-2 border-border/40 ring-2 ring-primary/10">
+          <Button variant="ghost" className="relative h-10 w-10 p-0 overflow-hidden rounded-full border-2 border-border/40 ring-2 ring-primary/10">
             <Avatar className="h-full w-full">
-              <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`} />
+              <AvatarImage src={user.photoURL || `https://picsum.photos/seed/${user.uid}/100/100`} className="object-cover" />
               <AvatarFallback className="bg-primary/20 text-primary font-bold">
                 {user.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase()}
               </AvatarFallback>
