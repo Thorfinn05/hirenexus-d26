@@ -56,11 +56,3 @@ PRs and issues are welcome. Follow any repository contribution guidelines if pre
 
 ## License
 Add a `LICENSE` file or state your preferred license here.
-
----
-Would you like me to:
-- Add an example `.env.local.example` with the required Firebase keys?
-- Create an `ENVIRONMENT.md` listing env vars and Firebase setup steps?
-- Start the dev server now and help fix any startup errors?
-
-Tell me which option you'd like next.
