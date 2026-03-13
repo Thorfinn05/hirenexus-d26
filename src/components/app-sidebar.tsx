@@ -41,13 +41,13 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar className="border-r border-border/40 bg-card/30" collapsible="icon">
-      <SidebarHeader className="p-4 h-16 flex items-center">
-        <Link href="/dashboard" className="flex items-center gap-3 w-full">
-          <div className="h-10 w-10 flex items-center justify-center shrink-0 overflow-hidden rounded-full border border-primary/20 bg-background">
+    <Sidebar className="border-r border-white/5 bg-background/40 backdrop-blur-xl" collapsible="icon">
+      <SidebarHeader className="p-4 h-16 flex items-center justify-center group-data-[state=expanded]:justify-start">
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div className="h-10 w-10 flex items-center justify-center shrink-0 overflow-hidden rounded-xl border border-primary/20 bg-background shadow-md shadow-primary/10">
             <img src="/logo.png" alt="HireNexus Logo" className="h-full w-full object-cover" />
           </div>
-          <span className="font-bold text-xl tracking-tighter font-headline group-data-[state=collapsed]:hidden overflow-hidden whitespace-nowrap">
+          <span className="font-bold text-xl tracking-tighter font-headline group-data-[state=collapsed]:hidden overflow-hidden whitespace-nowrap text-foreground">
             HireNexus
           </span>
         </Link>
@@ -67,14 +67,14 @@ export function AppSidebar() {
                       asChild
                       isActive={isActive}
                       tooltip={item.name}
-                      className={`w-full justify-start gap-4 px-3 py-6 rounded-xl transition-all duration-300 ${isActive
-                        ? "bg-primary/15 text-primary shadow-[0_0_15px_rgba(70,136,238,0.1)]"
-                        : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                      className={`w-full justify-start gap-4 px-3 py-6 rounded-xl transition-all duration-300 group-data-[state=collapsed]:px-0 group-data-[state=collapsed]:justify-center ${isActive
+                        ? "bg-primary/15 text-primary shadow-sm ring-1 ring-primary/20"
+                        : "text-muted-foreground hover:bg-muted/40 hover:text-foreground hover:shadow-sm"
                         }`}
                     >
                       <Link href={item.href}>
-                        <item.icon className={`h-5 w-5 ${isActive ? "text-primary" : ""}`} />
-                        <span className="font-bold tracking-tight">{item.name}</span>
+                        <item.icon className={`h-5 w-5 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                        <span className="font-semibold tracking-tight group-data-[state=collapsed]:hidden">{item.name}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -95,11 +95,11 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     tooltip={item.name}
-                    className="w-full justify-start gap-4 px-3 py-6 rounded-xl text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-all duration-300"
+                    className="w-full justify-start gap-4 px-3 py-6 rounded-xl text-muted-foreground hover:bg-muted/40 hover:text-foreground hover:shadow-sm transition-all duration-300 group-data-[state=collapsed]:px-0 group-data-[state=collapsed]:justify-center"
                   >
                     <Link href={item.href}>
-                      <item.icon className="h-5 w-5" />
-                      <span className="font-bold tracking-tight">{item.name}</span>
+                      <item.icon className="h-5 w-5 shrink-0" />
+                      <span className="font-semibold tracking-tight group-data-[state=collapsed]:hidden">{item.name}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
