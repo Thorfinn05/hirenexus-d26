@@ -237,8 +237,10 @@ export default function EvaluationsPage() {
                             <DropdownMenuItem className="gap-2" onClick={() => onAssignRoleClick(evalItem)}>
                               <Briefcase className="h-4 w-4" /> Assign Job Role
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2">
-                              <History className="h-4 w-4" /> Re-run Deliberation
+                            <DropdownMenuItem asChild>
+                              <Link href={`/evaluate/${evalItem.candidateId}`} className="flex items-center gap-2">
+                                <History className="h-4 w-4" /> Re-run Deliberation
+                              </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-border/40" />
                             <DropdownMenuItem className="text-destructive gap-2" onClick={() => handleArchiveEval(evalItem)}>
