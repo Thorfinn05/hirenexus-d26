@@ -45,11 +45,13 @@ const parseResumeFlow = ai.defineFlow(
   },
   async (input) => {
     try {
+      const base64Data = input.pdfDataUri.replace(/^data:application\/pdf;base64,/, '');
+
       const { output } = await executeGeminiWithFallback((config) => {
         return ai.generate({
           prompt: [
             { text: 'You are an expert HR data extractor. Read this PDF resume and extract ONLY the most relevant, crisp details. Focus on identifying specific technical skills, the core tech stack used in previous roles, and a brief summary of key projects. Keep descriptions extremely concise to save tokens. Avoid fluff or generic objective statements.' },
-            { media: { url: input.pdfDataUri, contentType: 'application/pdf' } },
+            { media: { url: `data:application/pdf;base64,${base64Data}` } },
           ],
           output: { schema: ParseResumeOutputSchema },
           ...config

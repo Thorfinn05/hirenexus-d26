@@ -73,7 +73,8 @@ export const GEMINI_MODELS = [
     'googleai/gemini-3.1-flash-lite-preview',
     'googleai/gemini-3-flash-preview',
     'googleai/gemini-2.5-flash',
-    'googleai/gemini-1.5-flash'
+    'googleai/gemini-flash-lite-latest'
+    // 'googleai/gemini-1.5-flash'
 ];
 
 let currentGeminiModelIndex = 0;

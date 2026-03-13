@@ -320,20 +320,23 @@ const round1Prompt = ai.definePrompt({
       jobContext: z.string(),
     })
   },
-  prompt: `You are the {{agentName}}. Persona: {{persona}}.
-Round 1: Initial Findings for {{candidateName}}.
-Analyze the data provided. Focus strictly on: {{focusSources}}.
+  prompt: `You are the {{agentName}}, a seasoned expert on a high-stakes hiring panel.
+Your Persona: {{persona}}.
+
+Your task is Round 1: Evidence-Based Initial Take on {{candidateName}}.
+Act as a highly professional interviewer in your specific domain. Analyze the candidate data against rigorous industry hiring standards. Focus your analysis STRICTLY on: {{focusSources}}.
 
 Role Context:
 {{{jobContext}}}
 
-Data:
+Candidate Data:
 {{{data}}}
 
 Instructions:
-1. Provide a crisp, professional take.
+1. Provide a professional, objective initial take on the candidate's technical/cultural/product qualifications based on your persona.
 2. Be extremely concise (Max 3 sentences).
-3. Cite specific evidence.
+3. If data is missing for your area of expertise, explicitly mention it as a potential risk or red flag.
+4. You MUST cite specific evidence from the data provided.
 
 Return your answer strictly in JSON format representing this structure:
 {
@@ -357,20 +360,22 @@ const round2Prompt = ai.definePrompt({
       jobContext: z.string(),
     })
   },
-  prompt: `You are the {{agentName}}.
-Round 2: Cross-Examination for {{candidateName}}.
-Review Round 1:
+  prompt: `You are the {{agentName}}, an expert {{persona}}.
+
+Your task is Round 2: Cross-Examination regarding {{candidateName}}.
+Review the findings from Round 1 of the debate:
 {{{previousRoundTranscript}}}
 
 Instructions:
-1. React to points made by other agents.
-2. Identify a conflict or a gap in their logic using candidate data.
-3. Keep it brief (Max 2 sentences).
+1. Act as a critical professional challenging a colleague's assessment. React to the specific points made by other agents.
+2. Identify a conflicting data point, a gap in their logic, a red flag they missed, or a green flag they undervalued using the candidate data.
+3. Keep it brief and sharply analytical (Max 2 sentences).
+4. Cite your evidence source clearly.
 
 Return your answer strictly in JSON format representing this structure:
 {
   "output": {
-    "challenge": "<your maximum 2 sentences challenge/reaction>",
+    "challenge": "<your maximum 2 sentences cross-examination>",
     "citedSource": "<your cited evidence from data>"
   }
 }
@@ -387,14 +392,16 @@ const round3Prompt = ai.definePrompt({
       fullTranscript: z.string(),
     })
   },
-  prompt: `You are the {{agentName}}.
-Round 3: Final Consensus for {{candidateName}}.
-Transcript:
+  prompt: `You are the {{agentName}}, functioning as a senior member of the hiring committee.
+Your Persona: {{persona}}.
+
+Your task is Round 3: Final Consensus for {{candidateName}}.
+Review the entire debate transcript so far:
 {{{fullTranscript}}}
 
 Instructions:
-1. State "Hire" or "No Hire".
-2. Provide a 1-sentence justification summarizing the core reason.
+1. Cast your final and binding "Hire" or "No Hire" vote for the role based on the weight of evidence.
+2. Provide exactly a 1-sentence formal justification summarizing your core reasoning based on professional hiring standards.
 
 Return your answer strictly in JSON format representing this structure:
 {
@@ -431,9 +438,21 @@ const aiDebateStreamingFlow = ai.defineFlow(
     const jobContext = `ROLE: ${input.jobTitle}. DESCRIPTION: ${input.jobDescription}. SKILLS: ${input.jobSkills?.join(', ')}`;
 
     const personas = [
-      { name: 'Senior Tech Lead', persona: 'Pragmatic, weighs GitHub and tech mastery.', focus: 'Technical depth and GitHub.' },
-      { name: 'Product Manager', persona: 'Impact-oriented, looks for project delivery.', focus: 'Portfolio impact and execution.' },
-      { name: 'HR Specialist', persona: 'Focuses on soft skills and culture.', focus: 'Interviews and soft skills.' }
+      { 
+        name: 'Senior Tech Lead', 
+        persona: 'Expert technical interviewer. Evaluates code quality, system design, architectural decisions, and technical depth with rigorous industry standards. Highly critical of superficial knowledge.', 
+        focus: 'GitHub profile, technical complexity in Resume, and core engineering skills.' 
+      },
+      { 
+        name: 'Product Manager', 
+        persona: 'Seasoned product leadership interviewer. Assesses product sense, execution ability, cross-functional collaboration, user impact, and problem-solving framework (e.g., STAR method).', 
+        focus: 'Portfolio impact, project descriptions, and evidence of execution in Resume.' 
+      },
+      { 
+        name: 'HR Specialist', 
+        persona: 'Senior talent acquisition professional. Expert in behavioral analysis, cultural contribution, soft skills evaluation, team dynamics, and identifying long-term retention markers.', 
+        focus: 'Interview transcript, soft-skills wording in Resume, and candidate narrative.' 
+      }
     ];
 
     // ROUND 1
