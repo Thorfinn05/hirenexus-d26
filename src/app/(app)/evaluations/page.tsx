@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import { motion } from "framer-motion"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -59,7 +60,16 @@ function ScoreCircle({ score }: { score: number }) {
     <div className="relative h-10 w-10 flex items-center justify-center">
       <svg className="h-full w-full -rotate-90">
         <circle cx="20" cy="20" r={radius} className="stroke-muted fill-none" strokeWidth="3" />
-        <circle cx="20" cy="20" r={radius} className={`fill-none transition-all duration-1000 ease-out ${getColor(score)}`} strokeWidth="3" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" />
+        <motion.circle 
+          cx="20" cy="20" r={radius} 
+          className={`fill-none ${getColor(score)}`} 
+          strokeWidth="3" 
+          strokeDasharray={circumference} 
+          strokeLinecap="round" 
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+        />
       </svg>
       <span className="absolute text-[10px] font-bold">{score}</span>
     </div>
@@ -180,64 +190,72 @@ export default function EvaluationsPage() {
             </div>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border/40 bg-muted/10">
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Candidate</th>
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 text-center">Score</th>
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 text-center">Recommendation</th>
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Started</th>
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {isLoading ? (
-                  <tr><td colSpan={5} className="p-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
-                ) : evaluations && evaluations.length > 0 ? (
-                  evaluations.map((evalItem) => (
-                    <tr key={evalItem.id} className="hover:bg-muted/20 transition-colors group">
-                      <td className="p-6"><span className="font-bold text-sm tracking-tight">{evalItem.candidateName}</span></td>
-                      <td className="p-6"><div className="flex justify-center"><ScoreCircle score={evalItem.confidenceScore} /></div></td>
-                      <td className="p-6 text-center"><span className="text-[11px] font-black uppercase tracking-wider text-primary">{evalItem.recommendation?.substring(0, 30)}...</span></td>
-                      <td className="p-6"><span className="text-sm font-medium text-muted-foreground">{evalItem.createdAt?.toDate ? evalItem.createdAt.toDate().toLocaleDateString() : '—'}</span></td>
-                      <td className="p-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Link href={`/reports/${evalItem.candidateId}`}><ArrowUpRight className="h-4 w-4" /></Link>
-                          </Button>
-                          <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                              <DropdownMenuLabel>AI Panel Actions</DropdownMenuLabel>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/reports/${evalItem.candidateId}`} className="flex items-center gap-2">
-                                  <ArrowUpRight className="h-4 w-4" /> View Full Report
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2" onClick={() => onAssignRoleClick(evalItem)}>
-                                <Briefcase className="h-4 w-4" /> Assign Job Role
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2">
-                                <History className="h-4 w-4" /> Re-run Deliberation
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive gap-2" onClick={() => handleArchiveEval(evalItem)}>
-                                <Archive className="h-4 w-4" /> Archive Result
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-muted/5">
+            {isLoading ? (
+              <div className="col-span-full py-12 flex justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : evaluations && evaluations.length > 0 ? (
+              evaluations.map((evalItem, i) => (
+                <motion.div
+                  key={evalItem.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                >
+                  <Card className="glass-panel hover:bg-muted/10 transition-colors overflow-hidden group">
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg tracking-tight mb-1">{evalItem.candidateName}</h3>
+                          <span className="text-sm font-medium text-muted-foreground">{evalItem.createdAt?.toDate ? evalItem.createdAt.toDate().toLocaleDateString() : '—'}</span>
                         </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr><td colSpan={5} className="p-12 text-center text-muted-foreground">No evaluations found.</td></tr>
-                )}
-              </tbody>
-            </table>
+                        <ScoreCircle score={evalItem.confidenceScore} />
+                      </div>
+                      
+                      <div className="mb-6">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-primary">{evalItem.recommendation?.substring(0, 50)}...</span>
+                      </div>
+                      
+                      <div className="flex items-center justify-between border-t border-border/40 pt-4 mt-auto">
+                        <Button variant="ghost" size="sm" asChild className="h-8 group-hover:bg-primary/10 transition-colors">
+                          <Link href={`/reports/${evalItem.candidateId}`} className="text-xs font-semibold gap-1">
+                            View Report <ArrowUpRight className="h-3 w-3" />
+                          </Link>
+                        </Button>
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56 glass-panel">
+                            <DropdownMenuLabel>AI Panel Actions</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/reports/${evalItem.candidateId}`} className="flex items-center gap-2">
+                                <ArrowUpRight className="h-4 w-4" /> View Full Report
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2" onClick={() => onAssignRoleClick(evalItem)}>
+                              <Briefcase className="h-4 w-4" /> Assign Job Role
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2">
+                              <History className="h-4 w-4" /> Re-run Deliberation
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-border/40" />
+                            <DropdownMenuItem className="text-destructive gap-2" onClick={() => handleArchiveEval(evalItem)}>
+                              <Archive className="h-4 w-4" /> Archive Result
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+                <div className="col-span-full py-12 text-center text-muted-foreground">
+                    No evaluations found.
+                </div>
+            )}
           </div>
         </CardContent>
       </Card>

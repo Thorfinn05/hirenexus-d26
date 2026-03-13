@@ -47,6 +47,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebas
 import { collection, addDoc, serverTimestamp, query, orderBy, doc, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
 
 export default function JobsPage() {
   const { user } = useUser()
@@ -223,13 +224,15 @@ export default function JobsPage() {
               Add Job
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] border-border/40 bg-card/95 backdrop-blur-xl">
+          <DialogContent className="sm:max-w-[550px] glass-panel p-0 overflow-hidden border-white/10 shadow-2xl">
             <form onSubmit={handleAddJob}>
-              <DialogHeader>
-                <DialogTitle>Create New Job Profile</DialogTitle>
-                <DialogDescription>Define parameters for AI panel deliberation.</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
+              <div className="bg-gradient-to-b from-muted/20 to-transparent p-6 pb-4 border-b border-white/5">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold font-headline text-foreground">Create New Job Profile</DialogTitle>
+                  <DialogDescription className="text-muted-foreground">Define parameters for AI panel deliberation.</DialogDescription>
+                </DialogHeader>
+              </div>
+              <div className="grid gap-5 p-6 pt-5 max-h-[60vh] overflow-y-auto w-full">
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="title">Job Title</Label>
@@ -323,10 +326,10 @@ export default function JobsPage() {
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={isSubmitting} className="font-bold">
-                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Create Position
+              <DialogFooter className="p-4 px-6 bg-muted/10 border-t border-white/5 gap-3 shrink-0 flex items-center">
+                <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="font-semibold text-muted-foreground hover:text-foreground">Cancel</Button>
+                <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground font-bold px-6 shadow-md shadow-primary/20 gap-2 rounded-full">
+                  {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />} Create Position
                 </Button>
               </DialogFooter>
             </form>
@@ -335,13 +338,15 @@ export default function JobsPage() {
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] border-border/40 bg-card/95 backdrop-blur-xl">
+        <DialogContent className="sm:max-w-[550px] glass-panel p-0 overflow-hidden border-white/10 shadow-2xl">
           <form onSubmit={handleEditJob}>
-            <DialogHeader>
-              <DialogTitle>Edit Job Profile</DialogTitle>
-              <DialogDescription>Update the requirements for this position.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className="bg-gradient-to-b from-muted/20 to-transparent p-6 pb-4 border-b border-white/5">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold font-headline text-foreground">Edit Job Profile</DialogTitle>
+                <DialogDescription className="text-muted-foreground">Update the requirements for this position.</DialogDescription>
+              </DialogHeader>
+            </div>
+            <div className="grid gap-5 p-6 pt-5 max-h-[60vh] overflow-y-auto w-full">
               <div className="grid gap-2">
                 <Label htmlFor="edit-title">Job Title</Label>
                 <Input id="edit-title" name="title" defaultValue={selectedJob?.title} required className="bg-muted/20" />
@@ -384,10 +389,10 @@ export default function JobsPage() {
                 <Textarea id="edit-desc" name="description" defaultValue={selectedJob?.descriptionText} className="min-h-[100px] bg-muted/20" />
               </div>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={isSubmitting} className="font-bold">
-                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Save Changes
+            <DialogFooter className="p-4 px-6 bg-muted/10 border-t border-white/5 gap-3 shrink-0 flex items-center">
+              <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)} className="font-semibold text-muted-foreground hover:text-foreground">Cancel</Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground font-bold px-6 shadow-md shadow-primary/20 gap-2 rounded-full">
+                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />} Save Changes
               </Button>
             </DialogFooter>
           </form>
@@ -408,66 +413,80 @@ export default function JobsPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border/40 bg-muted/20">
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Title</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Department</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Level</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Skills</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Status</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Created</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {isLoading ? (
-                  <tr><td colSpan={7} className="p-12 text-center"><Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" /></td></tr>
-                ) : activeJobs.length > 0 ? (
-                  activeJobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-muted/30 transition-colors group">
-                      <td className="p-4"><span className="font-semibold text-sm">{job.title}</span></td>
-                      <td className="p-4"><span className="text-sm text-muted-foreground">{job.department}</span></td>
-                      <td className="p-4"><span className="text-sm font-medium">{job.level}</span></td>
-                      <td className="p-4">
-                        <div className="flex flex-wrap gap-1.5">
-                          {job.skills?.slice(0, 3).map((skill: string, i: number) => (
-                            <Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-muted/20">{skill}</Badge>
-                          ))}
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-muted/5">
+            {isLoading ? (
+              <div className="col-span-full py-12 flex flex-col items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground font-medium">Loading jobs...</p>
+              </div>
+            ) : activeJobs.length > 0 ? (
+              activeJobs.map((job, i) => (
+                <motion.div
+                  key={job.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                >
+                  <Card className="glass-panel overflow-hidden group hover:border-primary/40 transition-all h-full flex flex-col hover:bg-muted/10">
+                    <CardContent className="p-6 flex-1 flex flex-col">
+                      <div className="flex justify-between items-start mb-4 gap-2">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg line-clamp-1" title={job.title}>{job.title}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">{job.department} · {job.level}</p>
                         </div>
-                      </td>
-                      <td className="p-4"><Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20">{job.status}</Badge></td>
-                      <td className="p-4"><span className="text-sm text-muted-foreground">{job.createdAt?.toDate ? job.createdAt.toDate().toLocaleDateString() : '—'}</span></td>
-                      <td className="p-4 text-right">
+                        <Badge className="bg-emerald-400/10 text-emerald-400 border-emerald-400/20 shrink-0">
+                          {job.status}
+                        </Badge>
+                      </div>
+                      
+                      <div className="mb-6 flex-1">
+                         <div className="flex flex-wrap gap-1.5 mt-2">
+                           {job.skills?.map((skill: string, idx: number) => (
+                             <Badge key={idx} variant="outline" className="text-[10px] px-2 py-0.5 bg-muted/20 border-border/40 text-muted-foreground">
+                               {skill}
+                             </Badge>
+                           ))}
+                         </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between border-t border-border/40 pt-4 mt-auto">
+                        <span className="text-[11px] text-muted-foreground font-medium">
+                          {job.createdAt?.toDate ? `Added ${job.createdAt.toDate().toLocaleDateString()}` : '—'}
+                        </span>
+                        
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary transition-all focus:ring-1 focus:ring-primary/50">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem className="gap-2" onClick={() => router.push('/candidates')}>
+                          <DropdownMenuContent align="end" className="w-48 glass-panel">
+                            <DropdownMenuItem className="gap-2 focus:bg-primary/10 focus:text-primary transition-colors" onClick={() => router.push('/candidates')}>
                               <UserPlus className="h-4 w-4" /> Add Candidate
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2">
+                            <DropdownMenuItem className="gap-2 focus:bg-primary/10 focus:text-primary transition-colors">
                               <Layers className="h-4 w-4" /> Re-index Profile
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="gap-2" onClick={() => onEditClick(job)}>
+                            <DropdownMenuSeparator className="bg-border/40" />
+                            <DropdownMenuItem className="gap-2 focus:bg-primary/10 focus:text-primary transition-colors" onClick={() => onEditClick(job)}>
                               <Edit2 className="h-4 w-4" /> Edit Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive gap-2" onClick={() => handleArchiveJob(job)}>
+                            <DropdownMenuItem className="text-destructive gap-2 focus:bg-destructive/10 focus:text-destructive transition-colors" onClick={() => handleArchiveJob(job)}>
                               <Archive className="h-4 w-4" /> Archive Position
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr><td colSpan={7} className="p-12 text-center text-muted-foreground">No active positions.</td></tr>
-                )}
-              </tbody>
-            </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center text-muted-foreground flex flex-col gap-4 items-center justify-center min-h-[40vh]">
+                <Layers className="h-10 w-10 opacity-30 mx-auto" />
+                <p>No active positions. Create a new job to get started.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

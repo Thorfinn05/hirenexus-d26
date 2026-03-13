@@ -3,6 +3,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { AuthGuard } from '@/components/auth-guard';
 import { GlobalSearch } from '@/components/global-search';
 import { UserNav } from '@/components/user-nav';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function AppLayout({
     children,
@@ -19,7 +20,10 @@ export default function AppLayout({
                             <SidebarTrigger className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors" />
                             <GlobalSearch />
                         </div>
-                        <UserNav />
+                        <div className="flex items-center gap-4">
+                            <ThemeToggle />
+                            <UserNav />
+                        </div>
                     </header>
                     <main className="flex-1 overflow-y-auto p-6">
                         {children}

@@ -17,7 +17,8 @@ import {
   Edit2,
   StickyNote,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Users
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -61,6 +62,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { parseResume } from "@/ai/flows/parse-resume-flow"
 import { parseCsvCandidates } from "@/ai/flows/parse-csv-candidates-flow"
 import { fetchAndParseResumeUrl } from "@/ai/flows/fetch-and-parse-resume-url-flow"
+import { motion } from "framer-motion"
 
 const candidateFormSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -381,26 +383,26 @@ export default function CandidatesPage() {
               Add Candidate
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-3xl border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+          <DialogContent className="sm:max-w-2xl glass-panel p-0 overflow-hidden border-white/10 shadow-2xl">
             <Tabs defaultValue="single" className="w-full">
-              <div className="p-6 pb-2">
+              <div className="bg-gradient-to-b from-muted/20 to-transparent p-6 pb-4 border-b border-white/5">
                 <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold flex justify-between items-center">
+                  <DialogTitle className="text-2xl font-bold font-headline flex justify-between items-center text-foreground">
                     Upload Candidate
                   </DialogTitle>
-                  <DialogDescription className="text-muted-foreground mt-2">
+                  <DialogDescription className="text-muted-foreground mt-1">
                     Add candidates directly or import via CSV bulk upload.
                   </DialogDescription>
                 </DialogHeader>
-                <TabsList className="mt-4 grid w-full grid-cols-2">
-                  <TabsTrigger value="single">Single Entry</TabsTrigger>
-                  <TabsTrigger value="bulk">Bulk Import (CSV)</TabsTrigger>
+                <TabsList className="mt-5 grid w-full grid-cols-2 bg-background/50 backdrop-blur-md p-1 border border-white/5 rounded-xl">
+                  <TabsTrigger value="single" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Single Entry</TabsTrigger>
+                  <TabsTrigger value="bulk" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">Bulk Import (CSV)</TabsTrigger>
                 </TabsList>
               </div>
 
               <TabsContent value="single" className="m-0 border-none outline-none">
                 <form onSubmit={addForm.handleSubmit(onSubmitAdd)}>
-                  <div className="p-6 pt-2 space-y-6 max-h-[70vh] overflow-y-auto">
+                  <div className="p-6 pt-5 space-y-6 max-h-[60vh] overflow-y-auto">
                     <div className="space-y-6">
                       <div>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-4">Personal Information</h4>
@@ -447,18 +449,18 @@ export default function CandidatesPage() {
                           <div className="space-y-1.5">
                             <Label className="text-xs font-bold">Resume (PDF) *</Label>
                             <input type="file" accept=".pdf" className="hidden" ref={resumeInputRef} onChange={(e) => handleFileChange(e, addForm, "resumeFile")} />
-                            <div onClick={() => resumeInputRef.current?.click()} className={`w-full flex items-center gap-3 p-4 rounded-xl border border-dashed transition-all cursor-pointer ${addResumeFile ? "bg-primary/10 border-primary text-primary" : "bg-muted/10 border-border/60 text-muted-foreground hover:border-muted-foreground/40"}`}>
-                              {addResumeFile ? <FileCheck className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
-                              <span className="text-sm font-bold">{addResumeFile ? addResumeFile.name : "Click to upload resume (PDF)"}</span>
+                            <div onClick={() => resumeInputRef.current?.click()} className={`w-full flex items-center justify-center flex-col gap-2 p-6 rounded-xl border border-dashed hover:shadow-md transition-all cursor-pointer ${addResumeFile ? "bg-primary/5 border-primary/50 text-primary" : "bg-background/40 border-border/60 text-muted-foreground hover:border-primary/40 hover:bg-background/60"}`}>
+                              {addResumeFile ? <FileCheck className="h-6 w-6 mb-1" /> : <FileText className="h-6 w-6 mb-1 opacity-70" />}
+                              <span className="text-sm font-semibold">{addResumeFile ? addResumeFile.name : "Click to upload resume (PDF)"}</span>
                             </div>
-                            <p className="text-[9px] text-muted-foreground mt-1">AI will automatically extract skills and experience from your PDF.</p>
+                            <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> AI will automatically extract skills and experience from your PDF.</p>
                           </div>
                           <div className="space-y-1.5">
                             <Label className="text-xs font-bold">Voice Interview Recording</Label>
                             <input type="file" accept=".mp3,.wav" className="hidden" ref={audioInputRef} onChange={(e) => handleFileChange(e, addForm, "audioFile")} />
-                            <div onClick={() => audioInputRef.current?.click()} className={`w-full flex items-center gap-3 p-4 rounded-xl border border-dashed transition-all cursor-pointer ${addAudioFile ? "bg-orange-400/10 border-orange-400 text-orange-400" : "bg-muted/10 border-border/60 text-muted-foreground hover:border-muted-foreground/40"}`}>
-                              <Mic className="h-5 w-5" />
-                              <span className="text-sm font-bold">{addAudioFile ? addAudioFile.name : "Click to upload audio (MP3/WAV)"}</span>
+                            <div onClick={() => audioInputRef.current?.click()} className={`w-full flex items-center gap-3 p-3.5 rounded-xl border border-dashed transition-all cursor-pointer ${addAudioFile ? "bg-orange-400/10 border-orange-400/50 text-orange-400" : "bg-background/40 border-border/60 text-muted-foreground hover:border-orange-400/40 hover:bg-background/60"}`}>
+                              <Mic className="h-4 w-4" />
+                              <span className="text-sm font-semibold">{addAudioFile ? addAudioFile.name : "Upload audio (MP3/WAV)"}</span>
                             </div>
                           </div>
                           <div className="space-y-2">
@@ -476,9 +478,9 @@ export default function CandidatesPage() {
                       </div>
                     </div>
                   </div>
-                  <DialogFooter className="p-6 bg-muted/20 border-t border-border/40 gap-3">
-                    <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="font-bold border border-border/40">Cancel</Button>
-                    <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground font-bold px-8 shadow-lg shadow-primary/20 gap-2">
+                  <DialogFooter className="p-4 px-6 bg-muted/10 border-t border-white/5 gap-3 shrink-0 flex items-center">
+                    <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="font-semibold text-muted-foreground hover:text-foreground">Cancel</Button>
+                    <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground font-bold px-6 shadow-md shadow-primary/20 gap-2 rounded-full">
                       {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Parsing Resume...</> : <><Upload className="h-4 w-4" /> Add Candidate</>}
                     </Button>
                   </DialogFooter>
@@ -525,9 +527,9 @@ export default function CandidatesPage() {
                         )}
                       </div>
                     </div>
-                    <DialogFooter className="p-6 bg-muted/20 border-t border-border/40 gap-3">
-                      <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmitting} className="font-bold border border-border/40">Cancel</Button>
-                      <Button onClick={onSubmitBulk} disabled={!csvFile || isSubmitting} className="bg-primary text-primary-foreground font-bold px-8 shadow-lg shadow-primary/20 gap-2">
+                    <DialogFooter className="p-4 px-6 bg-muted/10 border-t border-white/5 gap-3 shrink-0 flex items-center">
+                      <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} disabled={isSubmitting} className="font-semibold text-muted-foreground hover:text-foreground">Cancel</Button>
+                      <Button onClick={onSubmitBulk} disabled={!csvFile || isSubmitting} className="bg-primary text-primary-foreground font-bold px-6 shadow-md shadow-primary/20 gap-2 rounded-full">
                         {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</> : <><Upload className="h-4 w-4" /> Bulk Import</>}
                       </Button>
                     </DialogFooter>
@@ -557,13 +559,13 @@ export default function CandidatesPage() {
                         </div>
                       </div>
                     </div>
-                    <DialogFooter className="p-6 bg-muted/20 border-t border-border/40 gap-3">
-                      <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="font-bold border border-border/40">Finish Later</Button>
+                    <DialogFooter className="p-4 px-6 bg-muted/10 border-t border-white/5 gap-3 shrink-0 flex items-center">
+                      <Button type="button" variant="ghost" onClick={() => setIsAddDialogOpen(false)} className="font-semibold text-muted-foreground hover:text-foreground">Finish Later</Button>
                       <Button onClick={() => {
                         setIsAddDialogOpen(false);
                         router.push(`/evaluate/bulk?ids=${importedCandidateIds.join(",")}&hireCount=${hireTarget}`);
-                      }} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 shadow-lg shadow-primary/20 gap-2">
-                        <Play className="h-4 w-4 fill-current" /> Launch AI Panel for All
+                      }} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 shadow-md shadow-primary/20 gap-2 rounded-full">
+                        <Play className="h-4 w-4 fill-current" /> Launch AI Panel
                       </Button>
                     </DialogFooter>
                   </>
@@ -576,14 +578,15 @@ export default function CandidatesPage() {
 
       {/* Edit Dialog, Note Dialog remains same... */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] border-border/40 bg-card/95 backdrop-blur-xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-2xl glass-panel p-0 overflow-hidden border-white/10 shadow-2xl">
           <form onSubmit={editForm.handleSubmit(onSubmitEdit)}>
-            <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+            <div className="bg-gradient-to-b from-muted/20 to-transparent p-6 pb-4 border-b border-white/5">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold">Edit Candidate Profile</DialogTitle>
+                <DialogTitle className="text-xl font-bold font-headline text-foreground">Edit Candidate Profile</DialogTitle>
                 <DialogDescription className="text-muted-foreground">Modify candidate details or update materials.</DialogDescription>
               </DialogHeader>
-              <div className="space-y-6">
+            </div>
+            <div className="p-6 pt-5 space-y-6 max-h-[60vh] overflow-y-auto">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-bold">Full Name *</Label>
@@ -624,11 +627,10 @@ export default function CandidatesPage() {
                     </div>
                   </div>
                 </div>
-              </div>
             </div>
-            <DialogFooter className="p-6 bg-muted/20 border-t border-border/40 gap-3">
-              <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)} className="font-bold border border-border/40">Cancel</Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground font-bold px-8 shadow-lg shadow-primary/20 gap-2">
+            <DialogFooter className="p-4 px-6 bg-muted/10 border-t border-white/5 gap-3 shrink-0 flex items-center">
+              <Button type="button" variant="ghost" onClick={() => setIsEditDialogOpen(false)} className="font-semibold text-muted-foreground hover:text-foreground">Cancel</Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground font-bold px-6 shadow-md shadow-primary/20 gap-2 rounded-full">
                 {isSubmitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Updating...</> : <><Upload className="h-4 w-4" /> Save Changes</>}
               </Button>
             </DialogFooter>
@@ -671,136 +673,139 @@ export default function CandidatesPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border/40 bg-muted/20">
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Candidate</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Target Role</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Materials</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Status</th>
-                  <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {isCandidatesLoading ? (
-                  <tr>
-                    <td colSpan={5} className="p-12 text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-                      <p className="text-muted-foreground font-medium">Syncing pipeline...</p>
-                    </td>
-                  </tr>
-                ) : candidates && candidates.length > 0 ? (
-                  candidates.map((candidate) => (
-                    <tr key={candidate.id} className="hover:bg-muted/30 transition-colors group">
-                      <td className="p-4">
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 bg-muted/5">
+            {isCandidatesLoading ? (
+              <div className="col-span-full py-12 flex flex-col items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground font-medium">Syncing pipeline...</p>
+              </div>
+            ) : candidates && candidates.length > 0 ? (
+              candidates.map((candidate, i) => (
+                <motion.div
+                  key={candidate.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.4 }}
+                >
+                  <Card className="glass-panel overflow-hidden group hover:bg-muted/10 transition-colors h-full flex flex-col hover:border-primary/30">
+                    <CardContent className="p-6 flex-1 flex flex-col gap-4">
+                      <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center font-bold text-xs text-foreground group-hover:bg-primary/20 group-hover:text-primary transition-colors">
+                          <div className="h-10 w-10 min-w-[40px] rounded-full bg-muted flex items-center justify-center font-bold text-sm text-foreground group-hover:bg-primary/20 group-hover:text-primary transition-colors focus-within:ring-2 focus-within:ring-primary/40">
                             {candidate.fullName.split(' ').map((n: string) => n[0]).join('')}
                           </div>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-sm">{candidate.fullName}</span>
-                            <span className="text-[11px] text-muted-foreground">{candidate.email}</span>
+                          <div className="flex flex-col overflow-hidden">
+                            <span className="font-semibold text-sm truncate pr-2">{candidate.fullName}</span>
+                            <span className="text-[11px] text-muted-foreground truncate pr-2">{candidate.email}</span>
                           </div>
                         </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="text-sm font-medium">{candidate.role}</span>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          {candidate.hasResume && (
-                            <div className={`p-1.5 rounded-md transition-colors ${candidate.resumeText ? "bg-primary/10 text-primary" : "bg-muted/60 text-muted-foreground"}`} title={candidate.resumeFileName || "Resume PDF"}>
-                              <FileText className="h-3.5 w-3.5" />
-                            </div>
-                          )}
-                          {candidate.githubUrl && (
-                            <div className="p-1.5 rounded-md bg-muted/60 text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors" title="GitHub Profile">
-                              <Github className="h-3.5 w-3.5" />
-                            </div>
-                          )}
-                          {candidate.hasAudio && (
-                            <div className="p-1.5 rounded-md bg-muted/60 text-muted-foreground hover:text-orange-400 hover:bg-orange-400/10 transition-colors" title={candidate.audioFileName || "Voice Interview"}>
-                              <Mic className="h-3.5 w-3.5" />
-                            </div>
-                          )}
+                      </div>
+                      
+                      <div className="space-y-4 mb-2 flex-grow">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1">Target Role</p>
+                          <p className="text-sm font-medium">{candidate.role || "—"}</p>
                         </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <Badge className={
-                            candidate.status === "In Debate"
-                              ? "bg-primary/10 text-primary border-primary/20 animate-pulse"
-                              : candidate.status === "Evaluated"
-                                ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
-                                : candidate.status === "Parsed"
-                                  ? "bg-blue-400/10 text-blue-400 border-blue-400/20"
-                                  : candidate.status === "Parsing Failed"
-                                    ? "bg-destructive/10 text-destructive border-destructive/20"
-                                    : "bg-muted text-muted-foreground border-border/40"
-                          }>
-                            {candidate.status}
-                          </Badge>
-                          {candidate.status === "Parsing Failed" && (
-                            <AlertCircle className="h-3.5 w-3.5 text-destructive" title={candidate.parsingError} />
-                          )}
+                        
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Materials</p>
+                          <div className="flex items-center gap-2">
+                            {candidate.hasResume && (
+                              <div className={`p-1.5 rounded-md transition-colors ${candidate.resumeText ? "bg-primary/10 text-primary" : "bg-muted/60 text-muted-foreground"}`} title={candidate.resumeFileName || "Resume PDF"}>
+                                <FileText className="h-3.5 w-3.5" />
+                              </div>
+                            )}
+                            {candidate.githubUrl && (
+                              <div className="p-1.5 rounded-md bg-muted/60 text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors" title="GitHub Profile">
+                                <Github className="h-3.5 w-3.5" />
+                              </div>
+                            )}
+                            {candidate.hasAudio && (
+                              <div className="p-1.5 rounded-md bg-muted/60 text-muted-foreground hover:text-orange-400 hover:bg-orange-400/10 transition-colors" title={candidate.audioFileName || "Voice Interview"}>
+                                <Mic className="h-3.5 w-3.5" />
+                              </div>
+                            )}
+                            {(!candidate.hasResume && !candidate.githubUrl && !candidate.hasAudio) && (
+                              <span className="text-xs text-muted-foreground italic">None provided</span>
+                            )}
+                          </div>
                         </div>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {candidate.status === "Evaluated" ? (
-                            <Button variant="ghost" size="sm" asChild className="h-8 px-3 text-xs font-semibold gap-1.5 text-primary">
-                              <Link href={`/reports/${candidate.id}`}>
-                                View Report <ExternalLink className="h-3 w-3" />
-                              </Link>
+                        
+                        <div>
+                           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-1.5">Status</p>
+                           <div className="flex items-center gap-2">
+                            <Badge className={
+                              candidate.status === "In Debate"
+                                ? "bg-primary/10 text-primary border-primary/20 animate-pulse"
+                                : candidate.status === "Evaluated"
+                                  ? "bg-emerald-400/10 text-emerald-400 border-emerald-400/20"
+                                  : candidate.status === "Parsed"
+                                    ? "bg-blue-400/10 text-blue-400 border-blue-400/20"
+                                    : candidate.status === "Parsing Failed"
+                                      ? "bg-destructive/10 text-destructive border-destructive/20"
+                                      : "bg-muted text-muted-foreground border-border/40"
+                            }>
+                              {candidate.status}
+                            </Badge>
+                            {candidate.status === "Parsing Failed" && (
+                              <AlertCircle className="h-3.5 w-3.5 text-destructive" title={candidate.parsingError} />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between border-t border-border/40 pt-4 mt-auto">
+                        {candidate.status === "Evaluated" ? (
+                          <Button variant="ghost" size="sm" asChild className="h-8 px-3 text-xs font-semibold gap-1.5 text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 shadow-sm transition-all focus:ring-1 focus:ring-primary/50">
+                            <Link href={`/reports/${candidate.id}`}>
+                              View Report <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            disabled={!candidate.resumeText}
+                            className={`h-8 px-3 text-xs font-semibold gap-1.5 ${candidate.resumeText ? 'text-foreground hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 shadow-sm transition-all' : 'text-muted-foreground cursor-not-allowed border-none'}`}
+                          >
+                            <Link href={candidate.resumeText ? `/evaluate/${candidate.id}` : "#"}>
+                              Launch Panel <Play className="h-3 w-3 fill-current" />
+                            </Link>
+                          </Button>
+                        )}
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20 transition-all focus:ring-1 focus:ring-primary/50">
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              asChild
-                              disabled={!candidate.resumeText}
-                              className={`h-8 px-3 text-xs font-semibold gap-1.5 ${candidate.resumeText ? 'text-foreground hover:text-primary' : 'text-muted-foreground cursor-not-allowed'}`}
-                            >
-                              <Link href={candidate.resumeText ? `/evaluate/${candidate.id}` : "#"}>
-                                Launch AI Panel <Play className="h-3 w-3 fill-current" />
-                              </Link>
-                            </Button>
-                          )}
-                          <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="gap-2" onClick={() => onEditClick(candidate)}>
-                                <Edit2 className="h-4 w-4" /> Edit Profile
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2" onClick={() => onNoteClick(candidate)}>
-                                <StickyNote className="h-4 w-4" /> Add Note
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive font-bold gap-2" onClick={() => onDeleteCandidate(candidate)}>
-                                <Trash2 className="h-4 w-4" /> Delete Candidate
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="p-12 text-center text-muted-foreground">
-                      No candidates found. Click "Add Candidate" to get started.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 glass-panel">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator className="bg-border/40" />
+                            <DropdownMenuItem className="gap-2 focus:bg-primary/10 focus:text-primary transition-colors" onClick={() => onEditClick(candidate)}>
+                              <Edit2 className="h-4 w-4" /> Edit Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="gap-2 focus:bg-primary/10 focus:text-primary transition-colors" onClick={() => onNoteClick(candidate)}>
+                              <StickyNote className="h-4 w-4" /> Add Note
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-border/40" />
+                            <DropdownMenuItem className="text-destructive font-bold gap-2 focus:bg-destructive/10 focus:text-destructive transition-colors" onClick={() => onDeleteCandidate(candidate)}>
+                              <Trash2 className="h-4 w-4" /> Delete Candidate
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center text-muted-foreground w-full flex flex-col gap-4 items-center justify-center min-h-[50vh]">
+                 <Users className="h-10 w-10 opacity-30 mx-auto" />
+                 <p>No candidates found. Click "Add Candidate" to get started.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

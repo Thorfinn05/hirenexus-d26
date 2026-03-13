@@ -24,6 +24,7 @@ import { useUser, useFirestore } from "@/firebase"
 import { doc, getDoc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs, limit } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { motion } from "framer-motion"
 
 const agentColors: Record<string, string> = {
     "System": "text-muted-foreground",
@@ -42,7 +43,7 @@ type CandidateState = {
     result?: any;
 }
 
-function CandidateCard({ cs }: { cs: CandidateState }) {
+function CandidateCard({ cs, index }: { cs: CandidateState, index: number }) {
     const { candidate, events, isDebating, completed, result } = cs;
     const latestEvent = events[events.length - 1];
     const progressPercent = events.length === 0 ? 0 : Math.min(100, (events.length / 15) * 100);
@@ -55,7 +56,8 @@ function CandidateCard({ cs }: { cs: CandidateState }) {
     }, [events]);
 
     return (
-        <Card className="border-border/40 bg-card/40 backdrop-blur-sm shadow-lg overflow-hidden flex flex-col h-[380px]">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.4 }} className="h-full">
+        <Card className="glass-panel shadow-lg overflow-hidden flex flex-col h-[380px] hover:border-primary/30 transition-all">
             <CardHeader className="bg-muted/20 pb-3 border-b border-border/40">
                 <div className="flex justify-between items-start">
                     <div>
@@ -115,7 +117,7 @@ function CandidateCard({ cs }: { cs: CandidateState }) {
                     {isDebating && latestEvent ? `Round ${latestEvent.round} • ${latestEvent.agentName}` : ""}
                 </span>
                 {completed && (
-                    <Button variant="ghost" size="sm" asChild className="ml-auto font-bold text-xs h-8">
+                    <Button variant="ghost" size="sm" asChild className="ml-auto font-bold text-xs h-8 hover:bg-primary/10 hover:text-primary">
                         <Link href={`/reports/${candidate.id}`}>
                             View Full Report <ChevronRight className="ml-1 h-3 w-3" />
                         </Link>
@@ -123,6 +125,7 @@ function CandidateCard({ cs }: { cs: CandidateState }) {
                 )}
             </CardFooter>
         </Card>
+        </motion.div>
     );
 }
 
@@ -360,8 +363,8 @@ function BulkEvaluationContent() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {candidateList.map((cs) => (
-                    <CandidateCard key={cs.id} cs={cs} />
+                {candidateList.map((cs, i) => (
+                    <CandidateCard key={cs.id} cs={cs} index={i} />
                 ))}
             </div>
         </div>
