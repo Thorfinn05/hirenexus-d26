@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
+import { motion } from "framer-motion"
 
 export default function ReportDetailPage() {
   const { id } = useParams()
@@ -110,8 +111,8 @@ export default function ReportDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <Card className="border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="lg:col-span-2 space-y-8">
+          <Card className="glass-panel overflow-hidden border border-border/50 shadow-xl shadow-black/5">
             <CardHeader className="bg-muted/10 pb-6 border-b border-border/40">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-bold flex items-center gap-2">
@@ -160,10 +161,10 @@ export default function ReportDetailPage() {
               </div>
             </TabsContent>
           </Tabs>
-        </div>
+        </motion.div>
 
-        <div className="space-y-6">
-          <Card className="border-border/40 bg-card/40 overflow-hidden">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="space-y-6">
+          <Card className="glass-panel overflow-hidden shadow-lg border border-border/50">
             <CardHeader className="border-b border-border/40 bg-muted/10">
               <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
                 <ShieldCheck className="h-5 w-5 text-accent" />
@@ -210,7 +211,7 @@ export default function ReportDetailPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
     </div>
   )

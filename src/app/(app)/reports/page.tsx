@@ -24,13 +24,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Progress } from "@/components/ui/progress"
+import { motion } from "framer-motion"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 
 export default function ReportsListPage() {
   const { user } = useUser()
   const db = useFirestore()
+  const router = useRouter()
 
   const reportsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null
@@ -56,83 +59,85 @@ export default function ReportsListPage() {
         </div>
       </div>
 
-      <Card className="border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden">
+      <Card className="glass-panel overflow-hidden border border-border/50 shadow-lg">
         <CardContent className="p-0">
-          <div className="p-4 border-b border-border/40 flex items-center justify-between gap-4">
+          <div className="p-4 border-b border-border/40 flex items-center justify-between gap-4 bg-muted/10">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search candidates or roles..."
-                className="pl-9 bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary/50"
+                className="pl-9 bg-card/50 border-border/40 focus-visible:ring-1 focus-visible:ring-primary/50"
               />
             </div>
-            <Button variant="ghost" size="sm" className="text-muted-foreground gap-2">
-              <Filter className="h-4 w-4" />
-              Filter
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="text-muted-foreground gap-2 border-border/60">
+                <Filter className="h-4 w-4" />
+                Filter
+              </Button>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border/40 bg-muted/10">
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Candidate</th>
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Confidence</th>
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Date</th>
-                  <th className="p-6 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60 text-right"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={4} className="p-12 text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                    </td>
-                  </tr>
-                ) : reports && reports.length > 0 ? (
-                  reports.map((report) => (
-                    <tr key={report.id} className="hover:bg-muted/20 transition-colors group">
-                      <td className="p-6">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                            <FileText className="h-4 w-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            {isLoading ? (
+              <div className="col-span-full py-12 text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+              </div>
+            ) : reports && reports.length > 0 ? (
+              reports.map((report, i) => (
+                <motion.div
+                  key={report.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                >
+                  <Card 
+                    className="glass-panel overflow-hidden group hover:border-primary/40 transition-all h-full flex flex-col cursor-pointer border border-border/50 shadow-sm hover:shadow-md" 
+                    onClick={() => router.push(`/reports/${report.candidateId}`)}
+                  >
+                    <CardContent className="p-6 flex-1 flex flex-col gap-5 bg-gradient-to-br from-transparent to-muted/5 group-hover:to-primary/5 transition-all duration-500">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex gap-4">
+                          <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0 transition-colors group-hover:bg-primary/20">
+                            <FileText className="h-5 w-5" />
                           </div>
-                          <span className="font-bold text-sm tracking-tight">{report.candidateName}</span>
-                        </div>
-                      </td>
-                      <td className="p-6 min-w-[150px]">
-                        <div className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold text-primary">{report.confidenceScore}%</span>
+                          <div>
+                            <span className="font-bold text-lg tracking-tight line-clamp-1 group-hover:text-primary transition-colors" title={report.candidateName}>{report.candidateName}</span>
+                            <span className="text-xs text-muted-foreground mt-0.5 line-clamp-1">Synthesized Review</span>
                           </div>
-                          <Progress value={report.confidenceScore} className="h-1 bg-muted/40" />
                         </div>
-                      </td>
-                      <td className="p-6">
-                        <span className="text-xs font-medium text-muted-foreground">
+                        <div className="p-1.5 rounded-full bg-muted/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ArrowUpRight className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 mt-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">AI Confidence Level</span>
+                          <span className="text-sm font-black text-primary font-code">{report.confidenceScore}%</span>
+                        </div>
+                        <Progress value={report.confidenceScore} className="h-1.5 bg-muted border-none overflow-hidden" />
+                      </div>
+                      
+                      <div className="pt-4 border-t border-border/40 flex items-center justify-between mt-auto">
+                        <Badge variant="outline" className="bg-emerald-500/5 text-emerald-500 border-emerald-500/20 text-[10px] uppercase font-bold tracking-wider px-2 h-5">
+                          Consensus Reached
+                        </Badge>
+                         <span className="text-[11px] font-medium text-muted-foreground/80 flex items-center gap-1">
                           {report.createdAt?.toDate ? report.createdAt.toDate().toLocaleDateString() : '—'}
                         </span>
-                      </td>
-                      <td className="p-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="sm" asChild className="h-8 px-3 text-xs font-bold gap-2 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Link href={`/reports/${report.candidateId}`}>
-                              View Full Report <ArrowUpRight className="h-3 w-3" />
-                            </Link>
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="p-12 text-center text-muted-foreground">
-                      No consensus reports finalized yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))
+            ) : (
+               <div className="col-span-full py-16 text-center text-muted-foreground flex flex-col items-center gap-4">
+                 <div className="p-4 rounded-full bg-muted/30 border border-border/40">
+                   <FileText className="h-8 w-8 text-foreground/20" />
+                 </div>
+                 <p className="font-medium">No consensus reports finalized yet.</p>
+               </div>
+            )}
           </div>
         </CardContent>
       </Card>
