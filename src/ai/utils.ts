@@ -1,8 +1,10 @@
 export const GROQ_MODELS = [
-    'deepseek-r1-distill-llama-70b',
-    'gemma2-9b-it',
+    'meta-llama/llama-4-scout-17b-16e-instruct',
+    'openai/gpt-oss-20b',
     'llama-3.1-8b-instant',
-    'llama-3.3-70b-versatile'
+    'llama-3.3-70b-versatile',
+    'mixtral-8x7b-32768',
+    'qwen/qwen3-32b'
 ];
 
 let currentModelIndex = 0;
@@ -60,6 +62,7 @@ export async function executeWithFallback<TInput>(
 }
 
 export const GEMINI_MODELS = [
+    'googleai/gemini-3.1-flash-lite-preview',
     'googleai/gemini-3-flash-preview',
     'googleai/gemini-2.5-flash',
     'googleai/gemini-1.5-flash'
