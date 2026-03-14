@@ -4,26 +4,66 @@
 
 @layer base {
   :root {
-    --background: 216 15% 13%;
-    --foreground: 0 0% 100%;
-    --card: 216 15% 16%;
-    --card-foreground: 0 0% 100%;
-    --popover: 216 15% 13%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 216 84% 61%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 216 15% 25%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 216 15% 20%;
-    --muted-foreground: 216 15% 70%;
-    --accent: 189 90% 69%;
-    --accent-foreground: 216 15% 13%;
+    --background: 220 20% 4%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 20% 6%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 20% 6%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 250 84% 65%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 220 20% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 220 20% 12%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 250 84% 65%;
+    --accent-foreground: 210 40% 98%;
+
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 216 15% 25%;
-    --input: 216 15% 25%;
-    --ring: 216 84% 61%;
-    --radius: 0.75rem;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 20% 12%;
+    --input: 220 20% 12%;
+    --ring: 250 84% 65%;
+
+    --radius: 1rem;
+  }
+
+  /* Force dark mode specifically as the default "premium" aesthetic */
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+
+    --card: 224 71% 7%;
+    --card-foreground: 213 31% 91%;
+
+    --popover: 224 71% 7%;
+    --popover-foreground: 213 31% 91%;
+
+    --primary: 250 84% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+
+    --accent: 250 84% 65%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 250 84% 65%;
   }
 }
 
@@ -32,18 +72,79 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground font-body antialiased;
+    background-image: radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 60%);
+    background-size: 100vw 100vh;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    @apply bg-primary/30 text-primary-foreground;
   }
 }
 
-.glass-panel {
-  @apply bg-card/50 backdrop-blur-md border border-white/10;
+/* Premium Utilities */
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+  }
+
+  .glass-panel-hover {
+    @apply hover:bg-white/10 hover:border-white/20 transition-all duration-300;
+  }
+  
+  .glass-card {
+    @apply bg-background/40 backdrop-blur-2xl border border-white/10 shadow-2xl;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-white/90 to-white/50;
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 40px -10px hsl(var(--primary) / 0.5);
+  }
+  
+  .glow-primary-hover {
+    @apply hover:shadow-[0_0_60px_-15px_hsl(var(--primary)_/_0.6)] transition-shadow duration-300;
+  }
 }
 
-.glow-blue {
-  box-shadow: 0 0 20px rgba(70, 136, 238, 0.2);
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.glow-cyan {
-  box-shadow: 0 0 20px rgba(105, 225, 247, 0.2);
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}
+
+/* Base animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
 }

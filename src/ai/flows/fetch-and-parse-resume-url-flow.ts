@@ -65,7 +65,7 @@ const fetchAndParseResumeUrlFlow = ai.defineFlow(
                     return ai.generate({
                         prompt: [
                             { text: promptText },
-                            { media: { url: dataUri, contentType: 'application/pdf' } },
+                            { media: { url: `data:application/pdf;base64,${base64Data}` } },
                         ],
                         output: { schema: ParseResumeOutputSchema },
                         ...config

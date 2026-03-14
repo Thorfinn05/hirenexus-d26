@@ -1,8 +1,13 @@
 export const GROQ_MODELS = [
-    'deepseek-r1-distill-llama-70b',
-    'gemma2-9b-it',
+    // 'meta-llama/llama-4-scout-17b-16e-instruct',
+    // 'openai/gpt-oss-20b',
+    'llama-3.3-70b-versatile',
     'llama-3.1-8b-instant',
-    'llama-3.3-70b-versatile'
+    'meta-llama/llama-4-scout-17b-16e-instruct',
+    'moonshotai/kimi-k2-instruct-0905',
+    'openai/gpt-oss-20b',
+    'openai/gpt-oss-120b',
+    'qwen/qwen3-32b'
 ];
 
 let currentModelIndex = 0;
@@ -13,7 +18,11 @@ export function extractJson(text: string): any {
         return JSON.parse(text).output;
     } catch (e) {
         // Strip markdown formatting if present
-        const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        // const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const cleanText = text.replace(/<think>[\s\S]*?<\/think>/g, '') // Strip reasoning
+                      .replace(/```json/g, '')
+                      .replace(/```/g, '')
+                      .trim();
         try {
             return JSON.parse(cleanText).output;
         } catch (err) {
@@ -40,17 +49,18 @@ export async function executeWithFallback<TInput>(
     const maxAttempts = GROQ_MODELS.length;
 
     while (attempts < maxAttempts) {
-        const model = GROQ_MODELS[currentModelIndex];
+        const modelId = GROQ_MODELS[currentModelIndex];
         try {
-            console.log(`[AI Utils] Executing with model: groq/${model}`);
-            const result = await promptFn(input, { model: `groq/${model}` });
+            // Check if modelId already has the 'groq/' prefix to avoid 'groq/groq/...'
+            const fullModelPath = modelId.startsWith('groq/') ? modelId : `groq/${modelId}`;
+            
+            console.log(`[AI Utils] Executing with model: ${fullModelPath}`);
+            const result = await promptFn(input, { model: fullModelPath });
 
-            // Rotate model on success for load balancing
             currentModelIndex = (currentModelIndex + 1) % GROQ_MODELS.length;
             return { text: result.text };
         } catch (error: any) {
-            console.warn(`[AI Utils] Model groq/${model} failed: ${error.message}. Attempting fallback...`);
-            // Shift to the next model
+            console.warn(`[AI Utils] Model ${GROQ_MODELS[currentModelIndex]} failed: ${error.message}.`);
             currentModelIndex = (currentModelIndex + 1) % GROQ_MODELS.length;
             attempts++;
         }
@@ -60,9 +70,11 @@ export async function executeWithFallback<TInput>(
 }
 
 export const GEMINI_MODELS = [
+    'googleai/gemini-3.1-flash-lite-preview',
     'googleai/gemini-3-flash-preview',
     'googleai/gemini-2.5-flash',
-    'googleai/gemini-1.5-flash'
+    'googleai/gemini-flash-lite-latest'
+    // 'googleai/gemini-1.5-flash'
 ];
 
 let currentGeminiModelIndex = 0;

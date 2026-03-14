@@ -23,6 +23,7 @@ import { fetchGithubProfile } from "@/ai/flows/fetch-github-profile-flow"
 import { useUser, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, updateDoc, setDoc, serverTimestamp, collection, query, where, getDocs, limit } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
+import { motion } from "framer-motion"
 
 const agentIcons: Record<string, any> = {
   "System": ShieldCheck,
@@ -189,8 +190,8 @@ export default function EvaluationPage() {
       </div>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 overflow-hidden">
-        <div className="lg:col-span-3 flex flex-col gap-4 overflow-hidden">
-          <Card className="flex-1 border-border/40 bg-card/20 backdrop-blur-sm overflow-hidden flex flex-col">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="lg:col-span-3 flex flex-col gap-4 overflow-hidden h-full">
+          <Card className="glass-panel flex-1 overflow-hidden flex flex-col border border-border/50 shadow-xl shadow-black/5">
             <CardHeader className="border-b border-border/40 bg-muted/20 px-6 py-4 flex flex-row items-center justify-between shrink-0">
               <CardTitle className="text-lg flex items-center gap-2">
                 <BrainCircuit className="h-5 w-5 text-primary" />
@@ -254,10 +255,10 @@ export default function EvaluationPage() {
               </ScrollArea>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        <div className="flex flex-col gap-6 overflow-hidden">
-          <Card className="border-border/40 bg-card/40 shrink-0 shadow-lg">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="flex flex-col gap-6 overflow-hidden">
+          <Card className="glass-panel shrink-0 shadow-lg border border-border/50">
             <CardHeader className="pb-3 border-b border-border/40 mb-3 px-4 pt-4">
               <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Panel Presence</CardTitle>
             </CardHeader>
@@ -284,7 +285,7 @@ export default function EvaluationPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/40 bg-card/40 flex-1 overflow-hidden flex flex-col shadow-lg">
+          <Card className="glass-panel flex-1 overflow-hidden flex flex-col shadow-lg border border-border/50">
             <CardHeader className="pb-3 border-b border-border/40 mb-3 px-4 pt-4">
               <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Protocol Engine</CardTitle>
             </CardHeader>
@@ -315,7 +316,7 @@ export default function EvaluationPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
     </div>
   )

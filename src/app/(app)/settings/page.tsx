@@ -8,9 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, Settings as SettingsIcon, ShieldCheck, Mail, User as UserIcon } from "lucide-react"
+import { motion } from "framer-motion"
 
 export default function SettingsPage() {
-    const { user, isLoading } = useUser()
+    const { user, isUserLoading } = useUser()
     const auth = useAuth()
     const router = useRouter()
 
@@ -25,7 +26,7 @@ export default function SettingsPage() {
         }
     }
 
-    if (isLoading) {
+    if (isUserLoading) {
         return (
             <div className="flex h-[50vh] items-center justify-center">
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -57,7 +58,8 @@ export default function SettingsPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-                <Card className="border-border/40 bg-card/40 backdrop-blur-sm shadow-lg overflow-hidden flex flex-col">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <Card className="glass-panel shadow-lg overflow-hidden flex flex-col h-full hover:border-primary/30 transition-all rounded-3xl">
                     <CardHeader className="bg-muted/20 pb-4 border-b border-border/40">
                         <CardTitle className="text-xl flex items-center gap-2">
                             <UserIcon className="h-5 w-5 text-primary" />
@@ -92,8 +94,10 @@ export default function SettingsPage() {
                         </p>
                     </CardFooter>
                 </Card>
+                </motion.div>
 
-                <Card className="border-border/40 bg-card/40 backdrop-blur-sm shadow-lg overflow-hidden flex flex-col">
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+                <Card className="glass-panel shadow-lg overflow-hidden flex flex-col h-full hover:border-destructive/30 transition-all rounded-3xl">
                     <CardHeader className="bg-muted/20 pb-4 border-b border-border/40">
                         <CardTitle className="text-xl flex items-center gap-2 text-destructive">
                             <LogOut className="h-5 w-5" />
@@ -120,6 +124,7 @@ export default function SettingsPage() {
                         </div>
                     </CardContent>
                 </Card>
+                </motion.div>
             </div>
         </div>
     )

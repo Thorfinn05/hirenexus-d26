@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { motion } from "framer-motion"
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy, limit, where, Timestamp } from "firebase/firestore"
 
@@ -123,33 +124,46 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metrics.map((metric) => (
-          <Card key={metric.title} className="border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden group hover:border-primary/40 transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className={`p-2.5 rounded-xl ${metric.bgColor}`}>
-                  <metric.icon className={`h-5 w-5 ${metric.color}`} />
+        {metrics.map((metric, i) => (
+          <motion.div
+            key={metric.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1, duration: 0.5 }}
+          >
+            <Card className="glass-panel overflow-hidden group hover:border-primary/40 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className={`p-2.5 rounded-xl ${metric.bgColor} backdrop-blur-sm`}>
+                    <metric.icon className={`h-5 w-5 ${metric.color}`} />
+                  </div>
+                  <Badge variant="outline" className="font-medium text-[10px] uppercase tracking-wider text-muted-foreground/60 border-none">
+                    Live
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="font-medium text-[10px] uppercase tracking-wider text-muted-foreground/60 border-none">
-                  Live
-                </Badge>
-              </div>
-              <div className="mt-4">
-                <h3 className="text-2xl font-bold tracking-tight">{metric.value}</h3>
-                <p className="text-sm font-medium text-foreground/80 mt-1">{metric.title}</p>
-                <div className="flex items-center gap-1.5 mt-2">
-                  <TrendingUp className="h-3 w-3 text-emerald-400" />
-                  <span className="text-[11px] text-muted-foreground">{metric.change}</span>
+                <div className="mt-4">
+                  <h3 className="text-2xl font-bold tracking-tight">{metric.value}</h3>
+                  <p className="text-sm font-medium text-foreground/80 mt-1">{metric.title}</p>
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <TrendingUp className="h-3 w-3 text-emerald-400" />
+                    <span className="text-[11px] text-muted-foreground">{metric.change}</span>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 border-border/40 bg-card/40">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.4, duration: 0.5 }}
+           className="lg:col-span-2"
+        >
+          <Card className="glass-panel h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-xl font-bold">Recent Pipeline Activity</CardTitle>
               <CardDescription>Latest updates from candidates in evaluation.</CardDescription>
@@ -207,10 +221,16 @@ export default function Dashboard() {
               )}
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
 
-        <Card className="border-border/40 bg-card/40">
-          <CardHeader>
+        <motion.div
+           initial={{ opacity: 0, x: 30 }}
+           animate={{ opacity: 1, x: 0 }}
+           transition={{ delay: 0.5, duration: 0.5 }}
+        >
+          <Card className="glass-panel h-full">
+            <CardHeader>
             <CardTitle className="text-xl font-bold">Protocol Status</CardTitle>
             <CardDescription>AI panel readiness across your pipeline</CardDescription>
           </CardHeader>
@@ -239,7 +259,8 @@ export default function Dashboard() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
     </div>
   )
