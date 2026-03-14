@@ -21,17 +21,12 @@ export function UserProfileSynchronizer() {
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        // Create initial profile
-        await setDoc(userRef, {
-          id: user.uid,
-          email: user.email,
-          displayName: user.displayName || 'New User',
-          photoURL: user.photoURL || '',
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        }, { merge: true });
+        // We defer creation to LoginPage which handles Role selection.
+        // If they bypass login (somehow), we can create a default, but 
+        // usually LoginPage is the entry point for new users.
+        return; 
       } else {
-        // Optional: Update existing profile with latest auth data
+        // Only update basic fields, don't touch the role here
         await setDoc(userRef, {
           email: user.email,
           displayName: user.displayName || userSnap.data().displayName,
