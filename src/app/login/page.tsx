@@ -15,24 +15,59 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { useAuth } from "@/firebase"
+import { useAuth, useFirestore } from "@/firebase"
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup
 } from "firebase/auth"
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = React.useState(true)
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [loading, setLoading] = React.useState(false)
+  const [selectedRole, setSelectedRole] = React.useState<"recruiter" | "candidate">("candidate")
 
   const auth = useAuth()
+  const db = useFirestore()
   const router = useRouter()
   const { toast } = useToast()
+
+  const handleAuthSuccess = async (user: any) => {
+    if (!db) return;
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+
+    let destinationRole: "recruiter" | "candidate" = selectedRole;
+
+    // If doc exists, prioritize the stored role. 
+    // If doc exists but role is missing (race condition), still use selectedRole.
+    if (userSnap.exists() && userSnap.data().role) {
+      destinationRole = userSnap.data().role;
+    } 
+    
+    // Always ensure the doc exists with the correct role
+    await setDoc(userRef, {
+      id: user.uid,
+      email: user.email,
+      displayName: user.displayName || userSnap.data()?.displayName || 'New User',
+      photoURL: user.photoURL || userSnap.data()?.photoURL || '',
+      role: destinationRole,
+      updatedAt: serverTimestamp(),
+      ...(userSnap.exists() ? {} : { createdAt: serverTimestamp() })
+    }, { merge: true });
+
+    if (destinationRole === 'candidate') {
+      router.push("/candidate/dashboard")
+    } else {
+      router.push("/dashboard")
+    }
+  }
 
   const handleDemoFill = () => {
     setEmail("thorfinn1002@gmail.com")
@@ -43,12 +78,13 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     try {
+      let userCredential;
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password)
+        userCredential = await signInWithEmailAndPassword(auth, email, password)
       } else {
-        await createUserWithEmailAndPassword(auth, email, password)
+        userCredential = await createUserWithEmailAndPassword(auth, email, password)
       }
-      router.push("/dashboard")
+      await handleAuthSuccess(userCredential.user)
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -64,8 +100,8 @@ export default function LoginPage() {
     setLoading(true)
     const provider = new GoogleAuthProvider()
     try {
-      await signInWithPopup(auth, provider)
-      router.push("/dashboard")
+      const userCredential = await signInWithPopup(auth, provider)
+      await handleAuthSuccess(userCredential.user)
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -99,11 +135,22 @@ export default function LoginPage() {
             <CardTitle className="text-xl font-bold">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
             <CardDescription>
               {isLogin
-                ? "Sign in to manage your AI evaluation panels."
+                ? "Sign in to access your HireNexus account."
                 : "Join HireNexus and revolutionize your hiring process."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-3 pb-2">
+                <Label>I am a...</Label>
+                <Tabs value={selectedRole} onValueChange={(v) => setSelectedRole(v as any)} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="candidate">Candidate</TabsTrigger>
+                    <TabsTrigger value="recruiter">Recruiter</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+            )}
             <form onSubmit={handleEmailAuth} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>

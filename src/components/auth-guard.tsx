@@ -2,8 +2,9 @@
 'use client';
 
 import { useUser } from '@/firebase';
+import { useUserRole } from '@/hooks/use-user-role';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -12,20 +13,37 @@ import { Loader2 } from 'lucide-react';
  */
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
+  const { role, isRoleLoading } = useUserRole();
   const router = useRouter();
   const pathname = usePathname();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!isUserLoading && !user && pathname !== '/' && pathname !== '/login') {
+    if (isUserLoading || isRoleLoading) return;
+
+    if (!user && pathname !== '/' && pathname !== '/login') {
       router.push('/');
+      return;
     }
-  }, [user, isUserLoading, pathname, router]);
+
+    if (user && role) {
+      if (pathname.startsWith('/candidate/') && role === 'recruiter') {
+        router.push('/dashboard');
+        return;
+      } else if (!pathname.startsWith('/candidate/') && pathname !== '/' && pathname !== '/login' && role === 'candidate') {
+        router.push('/candidate/dashboard');
+        return;
+      }
+    }
+    
+    setIsReady(true);
+  }, [user, isUserLoading, role, isRoleLoading, pathname, router]);
 
   if (pathname === '/' || pathname === '/login') {
     return <>{children}</>;
   }
 
-  if (isUserLoading) {
+  if (isUserLoading || isRoleLoading || (!isReady && pathname !== '/' && pathname !== '/login')) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center gap-4 bg-background">
         <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center animate-pulse">

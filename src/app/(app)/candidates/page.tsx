@@ -748,7 +748,9 @@ export default function CandidatesPage() {
                               {candidate.status}
                             </Badge>
                             {candidate.status === "Parsing Failed" && (
-                              <AlertCircle className="h-3.5 w-3.5 text-destructive" title={candidate.parsingError} />
+                              <span title={candidate.parsingError as string | undefined}>
+                                <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+                              </span>
                             )}
                           </div>
                         </div>
