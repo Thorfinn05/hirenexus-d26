@@ -11,8 +11,8 @@ export const ai = genkit({
       apiKey: process.env.GROQ_API_KEY, // Ensure this is in your .env
       baseURL: 'https://api.groq.com/openai/v1',
     })],
-  // Keeping Gemini as my default model
-  model: 'googleai/gemini-2.5-flash',
+  // Use Gemini 3.1 Flash Lite as the default model
+  model: 'googleai/gemini-3.1-flash-lite-preview',
 });
 
 // import { genkit } from 'genkit';
