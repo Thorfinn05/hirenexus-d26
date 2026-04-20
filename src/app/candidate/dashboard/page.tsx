@@ -15,39 +15,67 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { useUser } from "@/firebase"
+import { useUser, useFirestore } from "@/firebase"
+import { doc, getDoc } from "firebase/firestore"
 
 export default function CandidateDashboard() {
   const { user, isUserLoading } = useUser()
+  const db = useFirestore()
+  const [profileData, setProfileData] = React.useState<any>(null)
+  const [isProfileLoading, setIsProfileLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    if (isUserLoading || !user || !db) return;
+
+    const fetchProfile = async () => {
+      try {
+        const docRef = doc(db, "users", user.uid)
+        const snap = await getDoc(docRef)
+        if (snap.exists()) {
+          setProfileData(snap.data())
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error)
+      } finally {
+        setIsProfileLoading(false)
+      }
+    }
+
+    fetchProfile()
+  }, [user, isUserLoading, db])
+
+  const hasResume = profileData?.hasResume || false;
+  const hasAnalysis = !!profileData?.lastAnalysis;
+  const consensusScore = profileData?.lastAnalysis?.consensus?.overallScore;
 
   const metrics = [
     {
       title: "Profile Completion",
-      value: "60%",
-      change: "Upload resume to improve",
+      value: hasAnalysis ? "100%" : hasResume ? "80%" : "60%",
+      change: hasAnalysis ? "Ready for jobs" : "Upload resume to improve",
       icon: FileText,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
-      title: "Active Applications",
-      value: "0",
-      change: "No active applications yet",
-      icon: Clock,
+      title: "Consensus Score",
+      value: consensusScore ? `${consensusScore}/100` : "-",
+      change: hasAnalysis ? "From 5 AI Agents" : "Run analysis to view",
+      icon: TrendingUp,
       color: "text-accent",
       bgColor: "bg-accent/10",
     },
     {
       title: "Mock Interviews",
       value: "0",
-      change: "Try a mock interview",
+      change: "Practice recommended",
       icon: Video,
       color: "text-emerald-400",
       bgColor: "bg-emerald-400/10",
     },
   ]
 
-  if (isUserLoading) {
+  if (isUserLoading || isProfileLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -165,8 +193,8 @@ export default function CandidateDashboard() {
             <div className="space-y-6">
               {[
                 { label: "Profile Created", done: true, color: "text-emerald-400" },
-                { label: "Resume Uploaded", done: false, color: "text-muted-foreground" },
-                { label: "AI Screening", done: false, color: "text-muted-foreground" },
+                { label: "Resume Uploaded", done: hasResume, color: hasResume ? "text-emerald-400" : "text-muted-foreground" },
+                { label: "AI Screening", done: hasAnalysis, color: hasAnalysis ? "text-emerald-400" : "text-muted-foreground" },
               ].map((act, i) => (
                 <div key={i} className="flex gap-4 items-start relative pb-6 last:pb-0">
                   {i !== 2 && <div className="absolute left-[11px] top-[28px] bottom-0 w-px bg-border/40" />}

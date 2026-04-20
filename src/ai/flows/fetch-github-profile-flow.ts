@@ -12,12 +12,18 @@ export async function fetchGithubProfile(githubUrl: string): Promise<string> {
 
         const username = match[1];
 
+        const headers: Record<string, string> = {
+            "User-Agent": "HireNexus-AI",
+            "Accept": "application/vnd.github.v3+json"
+        };
+        
+        if (process.env.GITHUB_TOKEN) {
+            headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+        }
+
         // Fetch user profile
         const userRes = await fetch(`https://api.github.com/users/${username}`, {
-            headers: {
-                "User-Agent": "HireNexus-AI",
-                "Accept": "application/vnd.github.v3+json"
-            },
+            headers,
             // Cache loosely to avoid rate limits
             next: { revalidate: 3600 }
         });
@@ -29,11 +35,8 @@ export async function fetchGithubProfile(githubUrl: string): Promise<string> {
         const userData = await userRes.json();
 
         // Fetch recent public repositories
-        const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=5`, {
-            headers: {
-                "User-Agent": "HireNexus-AI",
-                "Accept": "application/vnd.github.v3+json"
-            },
+        const reposRes = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=10`, {
+            headers,
             next: { revalidate: 3600 }
         });
 
@@ -46,15 +49,17 @@ export async function fetchGithubProfile(githubUrl: string): Promise<string> {
         let formattedData = `GitHub Profile: ${userData.login}\n`;
         if (userData.name) formattedData += `Name: ${userData.name}\n`;
         if (userData.bio) formattedData += `Bio: ${userData.bio}\n`;
-        formattedData += `Followers: ${userData.followers} | Public Repos: ${userData.public_repos}\n\n`;
+        formattedData += `Followers: ${userData.followers} | Public Repos: ${userData.public_repos}\n`;
+        formattedData += `Account created: ${userData.created_at}\n\n`;
 
         if (reposData && reposData.length > 0) {
-            formattedData += `Recent Active Repositories (Top 5):\n`;
+            formattedData += `Recent Active Repositories (Top 10):\n`;
             reposData.forEach((repo: any) => {
                 formattedData += `- ${repo.name}`;
                 if (repo.language) formattedData += ` [Language: ${repo.language}]`;
-                formattedData += `\n`;
+                formattedData += ` (Stars: ${repo.stargazers_count}, Forks: ${repo.forks_count}, Open Issues: ${repo.open_issues_count})\n`;
                 if (repo.description) formattedData += `  Description: ${repo.description}\n`;
+                if (repo.homepage) formattedData += `  Homepage: ${repo.homepage}\n`;
             });
         } else {
             formattedData += `No public repositories found.\n`;
