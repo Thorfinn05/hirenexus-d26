@@ -51,6 +51,14 @@ export interface ConsensusReport {
   debateTranscript: DebateMessage[];
   agentVotes: Record<string, number>;
   consensusNarrative?: string;
+  skillGapReport?: SkillGapReport; // Optional link to the detailed report
+}
+
+export interface SkillGapReport {
+  chartData: { skill: string; has: number; needs: number }[];
+  roadmap: { phase: string; duration: string; tasks: string[]; priority: 'low' | 'medium' | 'high' }[];
+  resources: { type: 'course' | 'project' | 'certification'; name: string; description: string; link?: string; priority: 'recommended' | 'essential' }[];
+  summary: string;
 }
 
 export const AGENT_PERSONAS: AgentPersona[] = [
