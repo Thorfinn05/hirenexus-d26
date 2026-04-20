@@ -20,9 +20,7 @@ import { useUser, useFirestore } from "@/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseResume } from "@/ai/flows/parse-resume-flow"
-import { fetchGithubProfile } from "@/ai/flows/fetch-github-profile-flow"
 import { motion } from "framer-motion"
-import { MultiAgentDebate } from "@/components/multi-agent-debate"
 
 export default function CandidateProfile() {
   const { user, isUserLoading } = useUser()
@@ -32,9 +30,7 @@ export default function CandidateProfile() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [isSaving, setIsSaving] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
-  const [isAnalyzing, setIsAnalyzing] = React.useState(false)
   const [profileData, setProfileData] = React.useState<any>(null)
-  const [analysisData, setAnalysisData] = React.useState<any>(null)
 
   const [fullName, setFullName] = React.useState("")
   const [githubUrl, setGithubUrl] = React.useState("")
@@ -137,49 +133,6 @@ export default function CandidateProfile() {
     }
   }
 
-  const runComprehensiveAnalysis = async () => {
-    if (!profileData?.resumeText) {
-      toast({ variant: "destructive", title: "Error", description: "Please upload your resume first." })
-      return
-    }
-
-    setIsAnalyzing(true)
-    try {
-      let githubData = "No GitHub URL provided"
-      if (githubUrl) {
-        githubData = await fetchGithubProfile(githubUrl)
-      }
-
-      const res = await fetch("/api/analyze-resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          resumeText: profileData.resumeText,
-          jobDescription: targetRole,
-          githubData
-        })
-      })
-
-      const data = await res.json()
-      if (data.success) {
-         setAnalysisData(data.data)
-         toast({ title: "Analysis Complete", description: "The agent panel has reached a consensus." })
-         
-         // Optionally save analysisData to user document
-         if(user && db) {
-           const docRef = doc(db, "users", user.uid)
-           await updateDoc(docRef, { lastAnalysis: data.data })
-         }
-      } else {
-         throw new Error(data.error)
-      }
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Analysis Failed", description: e.message || "Failed to analyze" })
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
-
   if (isUserLoading || isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -278,14 +231,6 @@ export default function CandidateProfile() {
                          </div>
                        ))}
                     </div>
-                    
-                    <div className="mt-6 pt-6 border-t border-border/40">
-                      <Button onClick={runComprehensiveAnalysis} disabled={isAnalyzing} className="w-full bg-gradient-to-r from-purple-500 to-primary hover:from-purple-600 hover:to-primary/90 text-white font-bold shadow-lg shadow-purple-500/20">
-                        {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <BarChart className="h-4 w-4 mr-2" />} 
-                        {isAnalyzing ? "Agents are deliberating..." : "Run Multi-Agent Deep Analysis"}
-                      </Button>
-                      <p className="text-xs text-muted-foreground text-center mt-3">This invokes the 5-agent panel and may take 30-45 seconds.</p>
-                    </div>
                   </div>
                 )}
               </div>
@@ -293,20 +238,6 @@ export default function CandidateProfile() {
           </Card>
         </motion.div>
       </div>
-
-      {analysisData && (
-        <motion.div
-           initial={{ opacity: 0, y: 30 }}
-           animate={{ opacity: 1, y: 0 }}
-           className="mt-12"
-        >
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold tracking-tight font-headline">Hiring Panel Evaluation</h2>
-            <p className="text-muted-foreground mt-1">Multi-agent debate results and consensus roadmap.</p>
-          </div>
-          <MultiAgentDebate data={analysisData} />
-        </motion.div>
-      )}
     </div>
   )
 }

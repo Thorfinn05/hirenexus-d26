@@ -6,7 +6,8 @@ import {
   UserCircle,
   Video,
   Settings,
-  Github
+  Github,
+  Users
 } from "lucide-react"
 
 import {
@@ -26,6 +27,7 @@ import { usePathname } from "next/navigation"
 const navigation = [
   { name: "Dashboard", href: "/candidate/dashboard", icon: LayoutDashboard },
   { name: "My Profile", href: "/candidate/profile", icon: UserCircle },
+  { name: "AI Resume Panel", href: "/candidate/resume-analysis", icon: Users },
   { name: "GitHub Analysis", href: "/candidate/github", icon: Github },
   { name: "Mock Interviews", href: "/candidate/mock-interview", icon: Video },
 ]
