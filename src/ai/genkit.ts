@@ -12,7 +12,8 @@ export const ai = genkit({
       baseURL: 'https://api.groq.com/openai/v1',
     })],
   // Use Gemini 3.1 Flash Lite as the default model
-  model: 'googleai/gemini-3.1-flash-lite-preview',
+  model: 'googleai/gemini-flash-lite-latest',
+  //model: ''googleai/gemini-3.1-flash-lite-preview,
 });
 
 // import { genkit } from 'genkit';

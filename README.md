@@ -2,49 +2,60 @@
 
 HireNexus is a web application for structured candidate evaluation and hiring workflows. It provides AI-assisted evaluation flows, job and candidate management, reporting, and Firebase-backed authentication and storage.
 
-## Key Features
-- AI-driven evaluation flows and report generation
-- Candidate and job management UI
-- Role-aware pages for evaluations, reports, and job listings
-- Firebase Auth and Firestore data storage
-- Reusable UI components and hooks (Tailwind + React + Next.js + TypeScript)
+## Use Cases & Roles
+
+HireNexus provides targeted experiences for two primary types of users:
+
+### 1. Recruiter / HR Professional
+The primary administrative and operational role for managing the hiring lifecycle.
+- **Candidate & Job Management**: Add, track, and review applicants across different job roles.
+- **Bulk Resume Parsing**: Utilize AI agents to extract structured data from arrays of applicant resumes (e.g., CSV imports, bulk uploads) to minimize manual data entry.
+- **AI-Driven Evaluation Flows**: AI automatically scores candidates based on standard criteria and acts as an intelligent assistant during the evaluation process.
+- **Debate & Comprehensive Reporting**: Leverage advanced AI flows (including an 'AI Debate Streaming Flow') where different AI personas assess candidate strengths and weaknesses. Synthesize results into comprehensive final reports to aid in the final hiring decision.
+
+### 2. Candidate
+A streamlined portal for applicants to engage with the recruitment process.
+- **Candidate Dashboard**: A personal hub to track application status, view relevant jobs, and manage profile/resume information.
+- **Mock Interviews**: Interactive, AI-powered mock interview sessions that help candidates prepare for real scenarios. The AI acts as an interviewer, asking relevant questions and providing instant feedback based on the candidate's responses.
+- **Skill Alignment**: Understand how their profile matches various open roles based on AI parsing and job requirements.
 
 ## Tech Stack
-- Next.js (App Router)
-- React + TypeScript
-- Tailwind CSS
-- Firebase (Auth + Firestore)
+- **Next.js (App Router)**
+- **React + TypeScript**
+- **Tailwind CSS**
+- **Firebase** (Auth + Firestore)
+- **AI / LLMs** (Custom flows for parsing, debate, and mock interviews)
 
 ## Quick Start (development)
 
-1. Install dependencies
+1. **Install dependencies**
 
 ```bash
 npm install
 ```
 
-2. Configure Firebase
-- Create a Firebase project and enable Auth + Firestore
-- Add your Firebase config to `src/firebase/config.ts` or supply the environment variables your app expects
+2. **Configure Firebase & Environment Parameters**
+- Create a Firebase project and enable Auth + Firestore.
+- Add your Firebase config to `src/firebase/config.ts` by ensuring the proper `.env.local` variables exist.
 
-3. Run the development server
+3. **Run the development server**
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000 to view the app.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ## Environment & Configuration
-- See `src/firebase/config.ts` for the expected Firebase config shape.
-- Keep secrets out of version control; use `.env.local` for local env vars.
+- Keep secrets out of version control; use `.env.local` for local environment variables.
+- AI flows might require API keys (e.g., Gemini model references in your environment).
 
 ## Project Layout
-- `src/app/` — Next.js pages and layouts
-- `src/components/` — UI components and design system
-- `src/firebase/` — Firebase initialization and utilities
-- `src/ai/` — AI flows and utilities
-- `src/hooks/` — Custom React hooks
+- `src/app/` — Next.js pages and route layouts (handles routing for `/candidate` and `/` recruiter areas)
+- `src/components/` — UI components and cohesive design system
+- `src/firebase/` — Firebase initialization and data models
+- `src/ai/` — AI logic including mock interview orchestration, prompt flows, and debate generation
+- `src/hooks/` — Custom React hooks (e.g., `useUserRole` for managing candidate/recruiter experiences)
 
 ## NPM Scripts
 - `npm run dev` — Start dev server
