@@ -27,10 +27,19 @@ const GithubAnalysisSchema = z.object({
     role: z.string(),
     description: z.string(),
     notableFeature: z.string()
-  })).describe("Top 3 most impressive repositories.")
+  })).describe("Top 3 most impressive repositories."),
+
+  projectRecommendations: z.array(z.object({
+    title: z.string(),
+    description: z.string(),
+    difficulty: z.enum(["Beginner", "Intermediate", "Advanced"]),
+    techStack: z.array(z.string()),
+    whyRelevance: z.string(),
+    isLevelUp: z.boolean()
+  })).describe("3-4 personalized project suggestions to bridge skill gaps.")
 })
 
-export async function analyzeGithubPortfolio(githubUrl: string) {
+export async function analyzeGithubPortfolio(githubUrl: string, context?: { targetRole?: string, stream?: string, year?: string }) {
   try {
     // 1. Extract username from https://github.com/username
     const urlParts = githubUrl.split('/')
@@ -76,11 +85,21 @@ export async function analyzeGithubPortfolio(githubUrl: string) {
       
       Total Yearly Contributions: ${gqlData.contributionsCollection.contributionCalendar.totalContributions}
       
+      User Context:
+      - Target Role: ${context?.targetRole || "Fullstack Developer"}
+      - Academic Stream: ${context?.stream || "Not specified"}
+      - Academic Year: ${context?.year || "Not specified"}
+
       Instructions:
-      1. Calculate 'techBreadth' percentages based on language frequency and repo counts, summing to roughly 100.
-      2. For 'complexityAssessment', evaluate the candidate on 4 exact metrics: "Architecture", "Code Complexity", "Modularity", and "Testing/QA" on a scale of 0-100. Deduce these based on repo names, descriptions, merged PRs (indicates teamwork/modularity), and general repo hygiene.
-      3. For 'commitConsistency', output an array of the chronological monthly contribution counts.
-      4. Highlight the Top 3 repositories and infer the candidate's likely role/focus in them.
+      1. Calculate 'techBreadth' percentages based on language frequency and repo counts.
+      2. For 'complexityAssessment', evaluate: "Architecture", "Code Complexity", "Modularity", and "Testing/QA" (0-100).
+      3. For 'commitConsistency', output chronological monthly contribution counts.
+      4. Highlight the Top 3 repositories.
+      5. **Project Recommendations (Level-Up Logic)**:
+         - Analyze existing repos. If they have a basic project in a field (e.g., Simple Todolist), suggest a high-level expansion (e.g., Real-time Collaborative Task Management with Redis).
+         - If they already have Advanced projects in a field, focus suggestions on DIFFERENT skill gaps relevant to their target role (${context?.targetRole}), unless the field is a high-growth industry trend.
+         - Tailor project difficulty based on their academic year and target role.
+         - Set 'isLevelUp' to true if it directly builds upon an existing repo field they already have.
     `
 
     // 4. Generate Structured Output using Genkit + Groq

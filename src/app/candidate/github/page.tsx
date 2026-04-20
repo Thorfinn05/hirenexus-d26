@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { useUser, useFirestore } from "@/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, Github, GitCommit, GitPullRequest, Code2, AlertCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Loader2, Github, GitCommit, GitPullRequest, Code2, AlertCircle, Sparkles, Zap, ArrowUpCircle } from "lucide-react"
 import {
   Area,
   AreaChart,
@@ -34,6 +35,9 @@ export default function CandidateGithubDashboard() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [isAnalyzing, setIsAnalyzing] = React.useState(false)
   const [githubUrl, setGithubUrl] = React.useState("")
+  const [targetRole, setTargetRole] = React.useState("")
+  const [academicStream, setAcademicStream] = React.useState("")
+  const [academicYear, setAcademicYear] = React.useState("")
   const [analysisData, setAnalysisData] = React.useState<any>(null)
 
   React.useEffect(() => {
@@ -46,6 +50,9 @@ export default function CandidateGithubDashboard() {
         if (snap.exists()) {
           const data = snap.data()
           setGithubUrl(data.githubUrl || "")
+          setTargetRole(data.targetRole || "")
+          setAcademicStream(data.academicStream || "")
+          setAcademicYear(data.academicYear || "")
           if (data.githubAnalysis) {
             setAnalysisData(data.githubAnalysis)
           }
@@ -71,7 +78,12 @@ export default function CandidateGithubDashboard() {
       const res = await fetch("/api/analyze-github", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ githubUrl })
+        body: JSON.stringify({ 
+          githubUrl,
+          targetRole,
+          stream: academicStream,
+          year: academicYear
+        })
       })
       const data = await res.json()
       if (data.success) {
@@ -263,6 +275,71 @@ export default function CandidateGithubDashboard() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          <div className="space-y-6 pt-12 border-t border-border/40">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold font-headline tracking-tight">AI-Powered Project Roadmap</h3>
+                <p className="text-muted-foreground">Strategic projects to level up your portfolio for <span className="text-primary font-bold">{targetRole || "your target role"}</span>.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
+              {analysisData.data.projectRecommendations?.map((rec: any, idx: number) => (
+                <Card key={idx} className="glass-panel relative overflow-hidden group hover:border-primary/50 transition-all duration-500">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <Zap className="h-20 w-20 text-primary" />
+                  </div>
+                  <CardContent className="p-8 space-y-6">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xl font-bold group-hover:text-primary transition-colors">{rec.title}</h4>
+                          {rec.isLevelUp && (
+                            <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[10px] uppercase font-bold tracking-tighter">
+                               Level Up Suggestion
+                            </Badge>
+                          )}
+                        </div>
+                        <Badge variant="outline" className="text-[10px] uppercase tracking-widest bg-background/50">
+                           {rec.difficulty}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                          <ArrowUpCircle className="h-3.5 w-3.5 text-primary" />
+                          <span className="text-[10px] font-bold text-primary tracking-tight">NEXT STEPS</span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-foreground/80 leading-relaxed font-medium">
+                      {rec.description}
+                    </p>
+
+                    <div className="space-y-3">
+                       <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground/60 flex items-center gap-2">
+                          <Code2 className="h-3 w-3" /> Recommended Stack
+                       </p>
+                       <div className="flex flex-wrap gap-2">
+                          {rec.techStack.map((tech: string, i: number) => (
+                            <span key={i} className="px-2 py-0.5 rounded-md bg-muted/40 text-[10px] font-bold text-foreground/70 border border-border/20">
+                              {tech}
+                            </span>
+                          ))}
+                       </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-primary/5 border border-primary/10 text-xs">
+                      <span className="font-bold text-primary block mb-1">Strategic Why:</span>
+                      <p className="text-muted-foreground italic leading-relaxed">"{rec.whyRelevance}"</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
 
         </motion.div>
