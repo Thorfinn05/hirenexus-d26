@@ -7,7 +7,8 @@ import {
   Video,
   Settings,
   Github,
-  Users
+  Users,
+  Target
 } from "lucide-react"
 
 import {
@@ -28,6 +29,7 @@ const navigation = [
   { name: "Dashboard", href: "/candidate/dashboard", icon: LayoutDashboard },
   { name: "My Profile", href: "/candidate/profile", icon: UserCircle },
   { name: "AI Resume Panel", href: "/candidate/resume-analysis", icon: Users },
+  { name: "Skill Gap & Roadmap", href: "/candidate/skill-gap", icon: Target },
   { name: "GitHub Analysis", href: "/candidate/github", icon: Github },
   { name: "Mock Interviews", href: "/candidate/mock-interview", icon: Video },
 ]

@@ -10,14 +10,18 @@ import { Button } from "@/components/ui/button";
 import { SkillGapDashboard } from "@/components/skill-gap-dashboard";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { History } from "lucide-react";
 
 export default function SkillGapPage() {
   const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const historyIdx = parseInt(searchParams.get("idx") || "0");
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  const [historyIdx, setHistoryIdx] = React.useState(parseInt(searchParams.get("idx") || "0"));
 
   const [isLoading, setIsLoading] = React.useState(true);
   const [isGenerating, setIsGenerating] = React.useState(false);
@@ -57,7 +61,7 @@ export default function SkillGapPage() {
     };
 
     fetchData();
-  }, [user, isUserLoading, db]);
+  }, [user, isUserLoading, db, historyIdx]);
 
   const generateReport = async () => {
     if (!analysisData) {
@@ -141,7 +145,7 @@ export default function SkillGapPage() {
   }
 
   return (
-    <div className="min-h-screen space-y-12 pb-20 max-w-7xl mx-auto px-4 md:px-8">
+    <div className="min-h-screen space-y-8 pb-20 max-w-7xl mx-auto px-4 md:px-8">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 py-8 border-b border-white/5">
         <div className="space-y-1">
           <div className="flex items-center gap-4">
@@ -205,14 +209,53 @@ export default function SkillGapPage() {
         </div>
       )}
 
-      {report && (
-        <motion.div
+      {report && !isGenerating && (
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-8 items-start">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-        >
+          >
             <SkillGapDashboard report={report} />
-        </motion.div>
+          </motion.div>
+
+          <aside className="space-y-6 xl:sticky xl:top-8">
+            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              <History className="h-4 w-4" /> Roadmap History
+            </div>
+            <div className="space-y-3">
+              {analysisHistory.map((item, idx) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setHistoryIdx(idx);
+                    router.push(`${pathname}?idx=${idx}`, { scroll: false });
+                  }}
+                  className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 relative group overflow-hidden ${
+                    historyIdx === idx
+                      ? 'bg-primary/10 border-primary/40 shadow-lg'
+                      : 'bg-background/40 border-border/40 hover:border-primary/20 hover:bg-background/60'
+                  }`}
+                >
+                  {historyIdx === idx && (
+                    <motion.div 
+                      layoutId="active-history-skill"
+                      className="absolute inset-y-0 left-0 w-1 bg-primary"
+                    />
+                  )}
+                  <div className="flex justify-between items-start mb-1">
+                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${historyIdx === idx ? 'text-primary' : 'text-muted-foreground'}`}>
+                      {idx === 0 ? 'Latest' : 'Previous'}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-foreground mb-1 pr-4">{item.targetRole}</h4>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{new Date(item.timestamp).toLocaleDateString()}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </aside>
+        </div>
       )}
     </div>
   );
