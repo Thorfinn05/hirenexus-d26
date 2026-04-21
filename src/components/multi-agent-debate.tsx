@@ -2,11 +2,14 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, MessagesSquare, BarChart, ChevronDown, CheckCircle, AlertTriangle, Lightbulb, Target } from "lucide-react";
+import { Users, MessagesSquare, BarChart, ChevronDown, CheckCircle, AlertTriangle, Lightbulb, Target, ArrowRight, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
-export function MultiAgentDebate({ data }: { data: any }) {
+import Link from "next/link";
+
+export function MultiAgentDebate({ data, historyIndex = 0 }: { data: any, historyIndex?: number }) {
   const [activeTab, setActiveTab] = useState<'analyses' | 'debate' | 'consensus'>('analyses');
   const [expandedAgent, setExpandedAgent] = useState<string | null>(null);
 
@@ -102,7 +105,7 @@ export function MultiAgentDebate({ data }: { data: any }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
           >
-            <ConsensusReport consensus={data.consensus} />
+            <ConsensusReport consensus={data.consensus} historyIndex={historyIndex} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -257,7 +260,7 @@ function DebateMessage({ message, delay }: { message: any, delay: number }) {
   );
 }
 
-function ConsensusReport({ consensus }: { consensus: any }) {
+function ConsensusReport({ consensus, historyIndex }: { consensus: any, historyIndex: number }) {
   if (!consensus) return null;
   
   return (
@@ -319,41 +322,32 @@ function ConsensusReport({ consensus }: { consensus: any }) {
         </Card>
       </div>
 
-      <Card className="glass-panel p-6">
-        <h3 className="font-bold text-lg mb-6 font-headline flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" /> Personalized Action Roadmap
-        </h3>
-        <div className="space-y-4">
-          {consensus.actionItems?.map((item: any, idx: number) => (
-            <div key={idx} className="flex flex-col md:flex-row md:items-center gap-4 p-4 rounded-xl bg-muted/20 border border-border/40 hover:border-primary/40 transition-colors">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className={
-                    item.priority === 'critical' ? 'bg-rose-500/20 text-rose-400' :
-                    item.priority === 'high' ? 'bg-amber-500/20 text-amber-400' :
-                    'bg-blue-500/20 text-blue-400'
-                  }>{item.priority}</Badge>
-                  <span className="font-bold">{item.action}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">{item.impact}</p>
-              </div>
-              <div className="flex flex-row md:flex-col gap-4 md:gap-1 text-sm bg-background/50 p-3 rounded-lg border border-border/30">
-                <div className="flex items-center justify-between min-w-[120px]">
-                  <span className="text-muted-foreground text-xs">Timeline:</span>
-                  <span className="font-medium">{item.timeline}</span>
-                </div>
-                <div className="flex items-center justify-between min-w-[120px]">
-                   <span className="text-muted-foreground text-xs">Effort:</span>
-                  <span className="font-medium capitalize">{item.effort}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <Card className="glass-panel overflow-hidden border-primary/30 bg-gradient-to-br from-primary/10 via-transparent to-accent/5">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none" />
+        <CardContent className="p-8 flex flex-col items-center text-center gap-6 relative z-10">
+          <div className="h-20 w-20 rounded-3xl bg-primary/20 flex items-center justify-center border border-primary/30 shadow-2xl shadow-primary/20">
+            <TrendingUp className="h-10 w-10 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl font-bold font-headline">Interactive Skill Gap & Roadmap</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Our AI has identified specific technical gaps. Click below to view a visual gap analysis, prioritized learning timeline, and curated expert resources.
+            </p>
+          </div>
+          
+          <Button asChild size="lg" className="h-14 px-10 bg-primary hover:bg-primary/90 text-white font-bold rounded-2xl shadow-xl shadow-primary/30 gap-3 group">
+            <Link href={`/candidate/skill-gap?idx=${historyIndex}`}>
+              View Detailed Roadmap <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+          
+          <div className="flex items-center gap-8 pt-4 border-t border-border/40 w-full justify-center opacity-60 text-[10px] uppercase font-bold tracking-widest">
+             <div className="flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-emerald-400" /> Gap Chart</div>
+             <div className="flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-purple-400" /> Timeline</div>
+             <div className="flex items-center gap-1.5"><CheckCircle className="h-3 w-3 text-blue-400" /> Resources</div>
+          </div>
+        </CardContent>
       </Card>
     </div>
   );
 }
-
-// Ensure lucide icon missing above is available or import it at top
-import { FileText, TrendingUp } from "lucide-react";

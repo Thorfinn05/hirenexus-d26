@@ -9,9 +9,11 @@ import { Label } from "@/components/ui/label"
 import { useUser, useFirestore } from "@/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2, Users, FileText, BarChart } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Loader2, Users, FileText, BarChart, History, Calendar, Trash2, ChevronRight } from "lucide-react"
 import { MultiAgentDebate } from "@/components/multi-agent-debate"
 import { fetchGithubProfile } from "@/ai/flows/fetch-github-profile-flow"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
 
 export default function ResumeAnalysisDashboard() {
@@ -22,6 +24,8 @@ export default function ResumeAnalysisDashboard() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [isAnalyzing, setIsAnalyzing] = React.useState(false)
   const [profileData, setProfileData] = React.useState<any>(null)
+  const [analysisHistory, setAnalysisHistory] = React.useState<any[]>([])
+  const [selectedHistoryIndex, setSelectedHistoryIndex] = React.useState(0)
   const [analysisData, setAnalysisData] = React.useState<any>(null)
 
   const [localTargetRole, setLocalTargetRole] = React.useState("")
@@ -41,8 +45,24 @@ export default function ResumeAnalysisDashboard() {
           setProfileData(data)
           if (!localTargetRole && data.targetRole) setLocalTargetRole(data.targetRole)
           if (!localGithub && data.githubUrl) setLocalGithub(data.githubUrl)
-          if (data.lastAnalysis) {
-            setAnalysisData(data.lastAnalysis)
+          
+          let history = data.analysisHistory || []
+          
+          // Migration from old lastAnalysis if exists and history is empty
+          if (history.length === 0 && data.lastAnalysis) {
+            history = [{
+              id: "legacy",
+              timestamp: Date.now(),
+              targetRole: data.targetRole || "Software Engineer",
+              analysisData: data.lastAnalysis,
+              context: { experience: data.experience || "" }
+            }]
+            await updateDoc(docRef, { analysisHistory: history })
+          }
+          
+          setAnalysisHistory(history)
+          if (history.length > 0) {
+            setAnalysisData(history[0].analysisData)
           }
         }
       } catch (error) {
@@ -87,12 +107,32 @@ The candidate wants to be evaluated for the above position.`
 
       const data = await res.json()
       if (data.success) {
-         setAnalysisData(data.data)
+         const newAnalysisEntry = {
+           id: crypto.randomUUID(),
+           timestamp: Date.now(),
+           targetRole: localTargetRole || "Software Engineer",
+           analysisData: data.data,
+           context: {
+             experience: localExperience,
+             linkedin: localLinkedin,
+             github: localGithub
+           }
+         };
+
+         const updatedHistory = [newAnalysisEntry, ...analysisHistory].slice(0, 2);
+         setAnalysisHistory(updatedHistory);
+         setAnalysisData(data.data);
+         setSelectedHistoryIndex(0);
+         
          toast({ title: "Analysis Complete", description: "The agent panel has reached a consensus." })
          
          if(user && db) {
            const docRef = doc(db, "users", user.uid)
-           await updateDoc(docRef, { lastAnalysis: data.data })
+           await updateDoc(docRef, { 
+             analysisHistory: updatedHistory,
+             // Keep targetRole updated in profile for other features
+             targetRole: localTargetRole 
+           })
          }
       } else {
          throw new Error(data.error)
@@ -178,17 +218,86 @@ The candidate wants to be evaluated for the above position.`
       )}
 
       {analysisData && !isAnalyzing && (
-        <motion.div
-           initial={{ opacity: 0, y: 30 }}
-           animate={{ opacity: 1, y: 0 }}
-           className="mt-12"
-        >
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold tracking-tight font-headline">Hiring Panel Evaluation</h2>
-            <p className="text-muted-foreground mt-1">Multi-agent debate results and consensus roadmap.</p>
-          </div>
-          <MultiAgentDebate data={analysisData} />
-        </motion.div>
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-8 mt-12 items-start">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            key={`analysis-${selectedHistoryIndex}`}
+          >
+            <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight font-headline">Hiring Panel Evaluation</h2>
+                <p className="text-muted-foreground mt-1">
+                  Showing results for <span className="text-primary font-bold">{analysisHistory[selectedHistoryIndex]?.targetRole}</span>
+                </p>
+              </div>
+              {selectedHistoryIndex > 0 && (
+                <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 py-2 px-4 rounded-full">
+                   Historical View
+                </Badge>
+              )}
+            </div>
+            <MultiAgentDebate data={analysisData} historyIndex={selectedHistoryIndex} />
+          </motion.div>
+
+          {/* History Sidebar */}
+          <aside className="space-y-6 xl:sticky xl:top-8">
+            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              <History className="h-4 w-4" /> Analysis History
+            </div>
+            <div className="space-y-3">
+              {analysisHistory.map((item, idx) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedHistoryIndex(idx);
+                    setAnalysisData(item.analysisData);
+                  }}
+                  className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 relative group overflow-hidden ${
+                    selectedHistoryIndex === idx
+                      ? 'bg-primary/10 border-primary/40 shadow-lg'
+                      : 'bg-background/40 border-border/40 hover:border-primary/20 hover:bg-background/60'
+                  }`}
+                >
+                  {selectedHistoryIndex === idx && (
+                    <motion.div 
+                      layoutId="active-history"
+                      className="absolute inset-y-0 left-0 w-1 bg-primary"
+                    />
+                  )}
+                  <div className="flex justify-between items-start mb-1">
+                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${selectedHistoryIndex === idx ? 'text-primary' : 'text-muted-foreground'}`}>
+                      {idx === 0 ? 'Latest' : 'Previous'}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1 opacity-60">
+                      <Calendar className="h-2.5 w-2.5" /> 
+                      {new Date(item.timestamp).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <h4 className={`font-bold text-sm leading-tight transition-colors ${selectedHistoryIndex === idx ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {item.targetRole}
+                  </h4>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                       <span className="text-[10px] font-medium text-muted-foreground"> Consensus Reached</span>
+                    </div>
+                    <ChevronRight className={`h-3 w-3 transition-transform ${selectedHistoryIndex === idx ? 'text-primary translate-x-0' : 'text-muted-foreground -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                  </div>
+                </button>
+              ))}
+              
+              {analysisHistory.length < 2 && (
+                <div className="p-6 rounded-2xl border border-dashed border-border/40 text-center space-y-2 opacity-50">
+                  <div className="h-8 w-8 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
+                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <p className="text-[10px] font-medium text-muted-foreground">Run another analysis to fill your history (Max 2 items)</p>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
       )}
     </div>
   )

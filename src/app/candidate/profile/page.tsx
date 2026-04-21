@@ -35,6 +35,8 @@ export default function CandidateProfile() {
   const [fullName, setFullName] = React.useState("")
   const [githubUrl, setGithubUrl] = React.useState("")
   const [targetRole, setTargetRole] = React.useState("")
+  const [academicStream, setAcademicStream] = React.useState("")
+  const [academicYear, setAcademicYear] = React.useState("")
   const [bio, setBio] = React.useState("")
   const [resumeFileName, setResumeFileName] = React.useState("")
   const [skills, setSkills] = React.useState<string[]>([])
@@ -54,6 +56,8 @@ export default function CandidateProfile() {
           setFullName(data.displayName || data.fullName || "")
           setGithubUrl(data.githubUrl || "")
           setTargetRole(data.targetRole || "")
+          setAcademicStream(data.academicStream || "")
+          setAcademicYear(data.academicYear || "")
           setBio(data.bio || data.notes || "")
           setResumeFileName(data.resumeFileName || "")
           setSkills(data.skills || [])
@@ -78,6 +82,8 @@ export default function CandidateProfile() {
         fullName: fullName,
         githubUrl,
         targetRole,
+        academicStream,
+        academicYear,
         bio,
       })
       toast({ title: "Profile Saved", description: "Your details have been updated." })
@@ -168,6 +174,17 @@ export default function CandidateProfile() {
                 <div className="space-y-2">
                   <Label htmlFor="targetRole" className="text-xs font-bold">Target Role</Label>
                   <Input id="targetRole" placeholder="e.g. Senior Frontend Engineer" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className="bg-muted/20 border-border/40" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="stream" className="text-xs font-bold">Academic Stream (e.g. Computer Science)</Label>
+                  <Input id="stream" placeholder="Your major/branch" value={academicStream} onChange={(e) => setAcademicStream(e.target.value)} className="bg-muted/20 border-border/40" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="year" className="text-xs font-bold">Academic Year (e.g. Final Year, 3rd Year)</Label>
+                  <Input id="year" placeholder="e.g. 2nd Year" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} className="bg-muted/20 border-border/40" />
                 </div>
               </div>
 
