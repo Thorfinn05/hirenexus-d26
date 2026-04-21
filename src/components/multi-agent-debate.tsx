@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, MessagesSquare, BarChart, ChevronDown, CheckCircle, AlertTriangle, Lightbulb, Target, ArrowRight, TrendingUp } from "lucide-react";
+import { Users, MessagesSquare, BarChart, ChevronDown, CheckCircle, AlertTriangle, Lightbulb, Target, ArrowRight, TrendingUp, FileText } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
