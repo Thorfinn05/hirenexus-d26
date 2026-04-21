@@ -20,11 +20,33 @@ A streamlined portal for applicants to engage with the recruitment process.
 - **Skill Alignment**: Understand how their profile matches various open roles based on AI parsing and job requirements.
 
 ## Tech Stack
+
+### Frontend
 - **Next.js (App Router)**
-- **React + TypeScript**
-- **Tailwind CSS**
-- **Firebase** (Auth + Firestore)
-- **AI / LLMs** (Custom flows for parsing, debate, and mock interviews)
+- **React** (with TypeScript)
+- **Tailwind CSS** (for styling)
+- **Radix UI (shadcn/ui)** (for accessible components)
+- **Framer Motion** (for animations)
+- **Recharts** (for data visualization)
+- **React Hook Form & Zod** (for form state and validation)
+
+### Backend
+- **Next.js API Routes / Server Actions** (Node.js environment)
+
+### Database & Storage
+- **Firebase Firestore** (NoSQL Database)
+
+### Data Processing
+- **jsPDF & jsPDF-AutoTable** (for PDF report generation)
+
+### AI/ML
+- **Google Genkit** (AI framework)
+- **Google Gemini** (`@google/generative-ai`)
+- **Groq** (`groq-sdk` for fast LLM inference)
+
+### Security
+- **Firebase Authentication** (User identity and access management)
+- **Zod** (Schema validation for secure data handling)
 
 ## Quick Start (development)
 
