@@ -13,7 +13,8 @@ const LOADING_STEPS = [
   { id: 5, text: "Engineering Manager is assessing leadership and delivery velocity...", delay: 18000 },
   { id: 6, text: "CTO is drafting final verdict and high-level strategy...", delay: 23000 },
   { id: 7, text: "Cross-referencing skill gaps with current market trends...", delay: 27000 },
-  { id: 8, text: "Generating personalized growth roadmap...", delay: 32000 },
+  // { id: 8, text: "Generating personalized growth roadmap...", delay: 32000 },
+  { id: 8, text: "Generating personalized scoring analysis...", delay: 32000 },
   { id: 9, text: "Finalizing consensus report...", delay: 36000 },
 ];
 
