@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Users, FileText, BarChart, History, Calendar, Trash2, ChevronRight } from "lucide-react"
 import { MultiAgentDebate } from "@/components/multi-agent-debate"
+import { AILoadingTerminal } from "@/components/ai-loading-terminal"
 import { fetchGithubProfile } from "@/ai/flows/fetch-github-profile-flow"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
@@ -211,7 +212,14 @@ The candidate wants to be evaluated for the above position.`
               </Button>
             </div>
             {isAnalyzing && (
-              <p className="text-xs text-muted-foreground text-right">Depending on the model size, this multi-agent consensus can take 30-45 seconds.</p>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <AILoadingTerminal />
+              </motion.div>
             )}
           </CardContent>
         </Card>
