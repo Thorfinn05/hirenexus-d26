@@ -1,4 +1,4 @@
-# HireNexus
+# HireNexus 💼
 
 HireNexus is an advanced, AI-powered platform designed to revolutionize the evaluation and hiring workflow. Built to bridge the gap between recruiters and candidates, the application offers structured evaluations, seamless candidate management, intelligent reporting, and Firebase-backed secure authentication.
 
