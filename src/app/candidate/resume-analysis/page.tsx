@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,12 +10,30 @@ import { useUser, useFirestore } from "@/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, Users, FileText, BarChart, History, Calendar, Trash2, ChevronRight } from "lucide-react"
+import { Loader2, Users, FileText, BarChart, History, Calendar, Trash2, ChevronRight, Sparkles } from "lucide-react"
 import { MultiAgentDebate } from "@/components/multi-agent-debate"
 import { AILoadingTerminal } from "@/components/ai-loading-terminal"
 import { fetchGithubProfile } from "@/ai/flows/fetch-github-profile-flow"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 }
+  }
+}
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+  }
+}
 
 export default function ResumeAnalysisDashboard() {
   const { user, isUserLoading } = useUser()
@@ -89,7 +107,6 @@ export default function ResumeAnalysisDashboard() {
         githubData = await fetchGithubProfile(localGithub)
       }
 
-      // Combine info into job description context
       const fullContext = `Target Role: ${localTargetRole || "Software Engineer"}
 Experience Level: ${localExperience || "Not specified"}
 LinkedIn: ${localLinkedin || "Not provided"}
@@ -131,7 +148,6 @@ The candidate wants to be evaluated for the above position.`
            const docRef = doc(db, "users", user.uid)
            await updateDoc(docRef, { 
              analysisHistory: updatedHistory,
-             // Keep targetRole updated in profile for other features
              targetRole: localTargetRole 
            })
          }
@@ -148,112 +164,125 @@ The candidate wants to be evaluated for the above position.`
   if (isUserLoading || isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
+          <span className="text-xs text-muted-foreground">Loading…</span>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight font-headline flex items-center gap-3">
-          <Users className="h-8 w-8 text-primary" /> AI Resume Panel
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8 max-w-7xl mx-auto"
+    >
+      <motion.div variants={itemVariants}>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground/95 flex items-center gap-2.5">
+          <Users className="h-6 w-6 text-primary/70" /> AI Resume Panel
         </h2>
-        <p className="text-muted-foreground mt-1 text-lg">Simulate an interview panel evaluating your resume.</p>
-      </div>
+        <p className="text-sm text-muted-foreground mt-1">Simulate an interview panel evaluating your resume.</p>
+      </motion.div>
 
       {!profileData?.hasResume ? (
-        <Card className="glass-panel border-orange-500/20 bg-orange-500/5">
-          <CardContent className="p-8 text-center space-y-4">
-            <FileText className="h-12 w-12 mx-auto text-orange-400 opacity-80" />
-            <h3 className="text-xl font-bold text-foreground">Resume Required</h3>
-            <p className="text-muted-foreground">You need to upload and parse a resume before our AI panel can deliberate on it.</p>
-            <Button asChild className="bg-orange-500 hover:bg-orange-600 font-bold text-white shadow-lg shadow-orange-500/20">
+        <motion.div variants={itemVariants}>
+          <div className="liquid-glass rounded-xl border-amber-500/10 p-8 text-center space-y-4">
+            <div className="h-14 w-14 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto">
+              <FileText className="h-7 w-7 text-amber-400/80" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground/90">Resume Required</h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">Upload and parse a resume before our AI panel can deliberate on it.</p>
+            <Button asChild className="bg-amber-500/90 hover:bg-amber-500 font-medium text-white h-9 px-5 text-xs rounded-lg">
               <Link href="/candidate/profile">Go to Profile</Link>
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
       ) : (
-        <Card className="glass-panel border-primary/20 bg-gradient-to-r from-background/40 to-primary/5">
-          <CardHeader>
-            <CardTitle>Configure Analysis Parameters</CardTitle>
-            <CardDescription>
-              Our 5 specialized AI personas (Tech Lead, HR, PM, EM, CTO) will review your extracted skills and debate your fit based on these details.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="role" className="font-bold">Target Job Role</Label>
-                <Input id="role" placeholder="e.g. Senior Fullstack Engineer" value={localTargetRole} onChange={e => setLocalTargetRole(e.target.value)} className="bg-background/40 border-border/40" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="experience" className="font-bold">Experience Level</Label>
-                <Input id="experience" placeholder="e.g. 5 Years, Mid-Level" value={localExperience} onChange={e => setLocalExperience(e.target.value)} className="bg-background/40 border-border/40" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="linkedin" className="font-bold">LinkedIn URL (Optional)</Label>
-                <Input id="linkedin" placeholder="https://linkedin.com/in/..." value={localLinkedin} onChange={e => setLocalLinkedin(e.target.value)} className="bg-background/40 border-border/40" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="github" className="font-bold">GitHub URL (Optional)</Label>
-                <Input id="github" placeholder="https://github.com/..." value={localGithub} onChange={e => setLocalGithub(e.target.value)} className="bg-background/40 border-border/40" />
-              </div>
+        <motion.div variants={itemVariants}>
+          <div className="liquid-glass-elevated rounded-xl overflow-hidden">
+            <div className="p-5 border-b border-white/[0.04]">
+              <h3 className="text-sm font-semibold text-foreground/90">Configure Analysis Parameters</h3>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                5 specialized AI personas (Tech Lead, HR, PM, EM, CTO) will review your extracted skills.
+              </p>
             </div>
+            <div className="p-5 space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="role" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Target Job Role</Label>
+                  <Input id="role" placeholder="e.g. Senior Fullstack Engineer" value={localTargetRole} onChange={e => setLocalTargetRole(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 h-10 text-sm" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="experience" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Experience Level</Label>
+                  <Input id="experience" placeholder="e.g. 5 Years, Mid-Level" value={localExperience} onChange={e => setLocalExperience(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 h-10 text-sm" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="linkedin" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">LinkedIn URL (Optional)</Label>
+                  <Input id="linkedin" placeholder="https://linkedin.com/in/..." value={localLinkedin} onChange={e => setLocalLinkedin(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 h-10 text-sm" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="github" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">GitHub URL (Optional)</Label>
+                  <Input id="github" placeholder="https://github.com/..." value={localGithub} onChange={e => setLocalGithub(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 h-10 text-sm" />
+                </div>
+              </div>
 
-            <div className="pt-4 border-t border-border/40 flex justify-end">
-              <Button 
-                onClick={runComprehensiveAnalysis} 
-                disabled={isAnalyzing}
-                className="py-6 px-8 bg-gradient-to-r from-purple-500 to-primary hover:from-purple-600 hover:to-primary/90 text-white font-bold shadow-lg shadow-purple-500/20 w-full md:w-auto text-lg whitespace-nowrap"
-              >
-                {isAnalyzing ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <BarChart className="h-5 w-5 mr-2" />}
-                {isAnalyzing ? "Panel is Deliberating..." : analysisData ? "Re-Run Analysis" : "Start Live Deliberation"}
-              </Button>
+              <div className="pt-3 border-t border-white/[0.04] flex justify-end">
+                <Button 
+                  onClick={runComprehensiveAnalysis} 
+                  disabled={isAnalyzing}
+                  className="h-11 px-6 bg-primary/90 hover:bg-primary text-primary-foreground font-medium text-sm rounded-lg transition-all duration-300 hover:shadow-[0_0_30px_-6px_hsl(var(--primary)_/_0.4)] w-full md:w-auto gap-2"
+                >
+                  {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {isAnalyzing ? "Panel is Deliberating…" : analysisData ? "Re-Run Analysis" : "Start Live Deliberation"}
+                </Button>
+              </div>
+              {isAnalyzing && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <AILoadingTerminal />
+                </motion.div>
+              )}
             </div>
-            {isAnalyzing && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <AILoadingTerminal />
-              </motion.div>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
       )}
 
       {analysisData && !isAnalyzing && (
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-8 mt-12 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 mt-8 items-start">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             key={`analysis-${selectedHistoryIndex}`}
           >
-            <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="mb-5 flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight font-headline">Hiring Panel Evaluation</h2>
-                <p className="text-muted-foreground mt-1">
-                  Showing results for <span className="text-primary font-bold">{analysisHistory[selectedHistoryIndex]?.targetRole}</span>
+                <h2 className="text-lg font-semibold tracking-tight text-foreground/95">Hiring Panel Evaluation</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Showing results for <span className="text-primary font-medium">{analysisHistory[selectedHistoryIndex]?.targetRole}</span>
                 </p>
               </div>
               {selectedHistoryIndex > 0 && (
-                <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 py-2 px-4 rounded-full">
-                   Historical View
-                </Badge>
+                <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400/80 border border-amber-500/10 w-fit">
+                  Historical View
+                </span>
               )}
             </div>
             <MultiAgentDebate data={analysisData} historyIndex={selectedHistoryIndex} />
           </motion.div>
 
           {/* History Sidebar */}
-          <aside className="space-y-6 xl:sticky xl:top-8">
-            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              <History className="h-4 w-4" /> Analysis History
+          <aside className="space-y-4 xl:sticky xl:top-8">
+            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60">
+              <History className="h-3.5 w-3.5" /> Analysis History
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               {analysisHistory.map((item, idx) => (
                 <button
                   key={item.id}
@@ -261,52 +290,46 @@ The candidate wants to be evaluated for the above position.`
                     setSelectedHistoryIndex(idx);
                     setAnalysisData(item.analysisData);
                   }}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 relative group overflow-hidden ${
+                  className={`w-full text-left p-3.5 rounded-xl border transition-all duration-300 relative group overflow-hidden ${
                     selectedHistoryIndex === idx
-                      ? 'bg-primary/10 border-primary/40 shadow-lg'
-                      : 'bg-background/40 border-border/40 hover:border-primary/20 hover:bg-background/60'
+                      ? 'liquid-glass-elevated border-primary/15'
+                      : 'bg-white/[0.02] border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.04]'
                   }`}
                 >
                   {selectedHistoryIndex === idx && (
                     <motion.div 
                       layoutId="active-history"
-                      className="absolute inset-y-0 left-0 w-1 bg-primary"
+                      className="absolute inset-y-0 left-0 w-[2px] bg-primary rounded-full"
                     />
                   )}
                   <div className="flex justify-between items-start mb-1">
-                    <span className={`text-[10px] font-bold uppercase tracking-tighter ${selectedHistoryIndex === idx ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <span className={`text-[10px] font-medium uppercase tracking-wider ${selectedHistoryIndex === idx ? 'text-primary/80' : 'text-muted-foreground/50'}`}>
                       {idx === 0 ? 'Latest' : 'Previous'}
                     </span>
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1 opacity-60">
+                    <span className="text-[10px] text-muted-foreground/40 flex items-center gap-1">
                       <Calendar className="h-2.5 w-2.5" /> 
                       {new Date(item.timestamp).toLocaleDateString()}
                     </span>
                   </div>
-                  <h4 className={`font-bold text-sm leading-tight transition-colors ${selectedHistoryIndex === idx ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  <h4 className={`font-medium text-sm leading-tight transition-colors ${selectedHistoryIndex === idx ? 'text-foreground/90' : 'text-muted-foreground/70'}`}>
                     {item.targetRole}
                   </h4>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                       <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                       <span className="text-[10px] font-medium text-muted-foreground"> Consensus Reached</span>
-                    </div>
-                    <ChevronRight className={`h-3 w-3 transition-transform ${selectedHistoryIndex === idx ? 'text-primary translate-x-0' : 'text-muted-foreground -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0'}`} />
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500/60" />
+                    <span className="text-[10px] text-muted-foreground/50">Consensus Reached</span>
                   </div>
                 </button>
               ))}
               
               {analysisHistory.length < 2 && (
-                <div className="p-6 rounded-2xl border border-dashed border-border/40 text-center space-y-2 opacity-50">
-                  <div className="h-8 w-8 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
-                    <Trash2 className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <p className="text-[10px] font-medium text-muted-foreground">Run another analysis to fill your history (Max 2 items)</p>
+                <div className="p-5 rounded-xl border border-dashed border-white/[0.06] text-center space-y-2">
+                  <p className="text-[10px] text-muted-foreground/40">Run another analysis to fill history (Max 2)</p>
                 </div>
               )}
             </div>
           </aside>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

@@ -25,6 +25,7 @@ import {
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { motion } from "framer-motion"
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = React.useState(true)
@@ -114,75 +115,81 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden">
-      {/* Abstract Background Gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/20 blur-[120px] rounded-full" />
+    <div className="candidate-theme min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden">
+      {/* Ambient background */}
+      <div className="ambient-orb ambient-orb-1" />
+      <div className="ambient-orb ambient-orb-2" />
 
-      <div className="w-full max-w-md p-4 relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-[400px] p-4 relative z-10"
+      >
         <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/40">
-            <BrainCircuit className="h-8 w-8 text-primary-foreground" />
+          <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center border border-primary/15">
+            <BrainCircuit className="h-6 w-6 text-primary" />
           </div>
-          <h1 className="text-3xl font-black tracking-tighter font-headline">HireNexus</h1>
-          <p className="text-muted-foreground text-center font-medium">
-            The next generation of multi-agent AI hiring.
+          <h1 className="text-2xl font-bold tracking-tight font-headline text-foreground/95">HireNexus</h1>
+          <p className="text-sm text-muted-foreground text-center">
+            Next-gen multi-agent AI hiring platform.
           </p>
         </div>
 
-        <Card className="border-border/40 bg-card/40 backdrop-blur-xl shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
-            <CardDescription>
+        <div className="liquid-glass-elevated rounded-xl overflow-hidden">
+          <div className="p-5 border-b border-white/[0.04]">
+            <h2 className="text-sm font-semibold text-foreground/90">{isLogin ? "Welcome Back" : "Create Account"}</h2>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
               {isLogin
                 ? "Sign in to access your HireNexus account."
                 : "Join HireNexus and revolutionize your hiring process."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </p>
+          </div>
+          
+          <div className="p-5 space-y-4">
             {!isLogin && (
-              <div className="space-y-3 pb-2">
-                <Label>I am a...</Label>
+              <div className="space-y-2 pb-1">
+                <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">I am a…</Label>
                 <Tabs value={selectedRole} onValueChange={(v) => setSelectedRole(v as any)} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="candidate">Candidate</TabsTrigger>
-                    <TabsTrigger value="recruiter">Recruiter</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 bg-white/[0.03] border border-white/[0.06]">
+                    <TabsTrigger value="candidate" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary text-xs font-medium">Candidate</TabsTrigger>
+                    <TabsTrigger value="recruiter" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary text-xs font-medium">Recruiter</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
             )}
-            <form onSubmit={handleEmailAuth} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+            <form onSubmit={handleEmailAuth} className="space-y-3.5">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="name@company.com"
-                    className="pl-10 bg-muted/20 border-border/40"
+                    className="pl-9 bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 h-10 text-sm"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Password</Label>
                   {isLogin && (
-                    <Button variant="link" className="px-0 h-auto text-xs text-primary">
+                    <button type="button" className="text-[10px] text-primary/60 hover:text-primary/80 font-medium transition-colors">
                       Forgot password?
-                    </Button>
+                    </button>
                   )}
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-10 bg-muted/20 border-border/40"
+                    className="pl-9 bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 h-10 text-sm"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -191,7 +198,7 @@ export default function LoginPage() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-11"
+                className="w-full bg-primary/90 hover:bg-primary text-primary-foreground font-medium h-10 text-sm rounded-lg transition-all duration-300 hover:shadow-[0_0_24px_-4px_hsl(var(--primary)_/_0.4)]"
                 disabled={loading}
               >
                 {loading ? (
@@ -199,7 +206,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     {isLogin ? "Sign In" : "Sign Up"}
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-3.5 w-3.5" />
                   </>
                 )}
               </Button>
@@ -207,16 +214,16 @@ export default function LoginPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/40" />
+                <span className="w-full border-t border-white/[0.06]" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground font-bold tracking-widest">Or continue with</span>
+              <div className="relative flex justify-center text-[10px]">
+                <span className="px-3 text-muted-foreground/50 font-medium uppercase tracking-wider" style={{ backgroundColor: "hsl(225, 20%, 7%)" }}>Or continue with</span>
               </div>
             </div>
 
             <Button
               variant="outline"
-              className="w-full border-border/60 font-bold h-11 bg-white/5"
+              className="w-full border-white/[0.06] font-medium h-10 text-sm bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-200"
               onClick={handleGoogleSignIn}
               disabled={loading}
             >
@@ -240,33 +247,32 @@ export default function LoginPage() {
               </svg>
               Google
             </Button>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <div className="text-sm text-center text-muted-foreground font-medium">
+          </div>
+          
+          <div className="p-4 border-t border-white/[0.04] space-y-3">
+            <div className="text-xs text-center text-muted-foreground/60">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-primary font-bold hover:underline"
+                className="text-primary/70 font-medium hover:text-primary transition-colors"
               >
                 {isLogin ? "Sign up" : "Sign in"}
               </button>
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-[10px] uppercase tracking-widest font-black opacity-60 hover:opacity-100"
+            <button
+              className="w-full text-[10px] text-center text-muted-foreground/30 hover:text-muted-foreground/50 uppercase tracking-[0.15em] font-medium transition-colors py-1"
               onClick={handleDemoFill}
             >
               Fill Demo Credentials
-            </Button>
-          </CardFooter>
-        </Card>
+            </button>
+          </div>
+        </div>
 
-        <p className="mt-8 text-center text-[10px] text-muted-foreground/40 uppercase tracking-[0.2em] font-black">
+        <p className="mt-6 text-center text-[10px] text-muted-foreground/25 uppercase tracking-[0.2em] font-medium">
           Powered by Genkit & Firebase
         </p>
-      </div>
+      </motion.div>
     </div>
   )
 }

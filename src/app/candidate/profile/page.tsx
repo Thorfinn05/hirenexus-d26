@@ -20,7 +20,25 @@ import { useUser, useFirestore } from "@/firebase"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseResume } from "@/ai/flows/parse-resume-flow"
-import { motion } from "framer-motion"
+import { motion, type Variants } from "framer-motion"
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 }
+  }
+}
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 14, filter: "blur(4px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+  }
+}
 
 export default function CandidateProfile() {
   const { user, isUserLoading } = useUser()
@@ -142,120 +160,129 @@ export default function CandidateProfile() {
   if (isUserLoading || isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-primary/60" />
+          <span className="text-xs text-muted-foreground">Loading…</span>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight font-headline">My Profile</h2>
-        <p className="text-muted-foreground mt-1">Manage your details and AI-parsed resume context.</p>
-      </div>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-8 max-w-4xl mx-auto"
+    >
+      <motion.div variants={itemVariants}>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground/95">My Profile</h2>
+        <p className="text-sm text-muted-foreground mt-1">Manage your details and AI-parsed resume context.</p>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <motion.div
-           initial={{ opacity: 0, y: 30 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.1, duration: 0.5 }}
-           className="md:col-span-2 space-y-6"
-        >
-          <Card className="glass-panel">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold flex items-center gap-2"><User className="h-5 w-5" /> Basic Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Main form */}
+        <motion.div variants={itemVariants} className="md:col-span-2">
+          <div className="liquid-glass rounded-xl overflow-hidden">
+            <div className="p-5 border-b border-white/[0.04]">
+              <h3 className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
+                <User className="h-4 w-4 text-muted-foreground" /> Basic Information
+              </h3>
+            </div>
+            <div className="p-5 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-xs font-bold">Full Name</Label>
-                  <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-muted/20 border-border/40" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="fullName" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Full Name</Label>
+                  <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 h-10 text-sm transition-all duration-200" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="targetRole" className="text-xs font-bold">Target Role</Label>
-                  <Input id="targetRole" placeholder="e.g. Senior Frontend Engineer" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className="bg-muted/20 border-border/40" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                <div className="space-y-2">
-                  <Label htmlFor="stream" className="text-xs font-bold">Academic Stream (e.g. Computer Science)</Label>
-                  <Input id="stream" placeholder="Your major/branch" value={academicStream} onChange={(e) => setAcademicStream(e.target.value)} className="bg-muted/20 border-border/40" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="year" className="text-xs font-bold">Academic Year (e.g. Final Year, 3rd Year)</Label>
-                  <Input id="year" placeholder="e.g. 2nd Year" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} className="bg-muted/20 border-border/40" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="targetRole" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Target Role</Label>
+                  <Input id="targetRole" placeholder="e.g. Senior Frontend Engineer" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 h-10 text-sm transition-all duration-200" />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="githubUrl" className="text-xs font-bold">GitHub URL</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="stream" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Academic Stream</Label>
+                  <Input id="stream" placeholder="e.g. Computer Science" value={academicStream} onChange={(e) => setAcademicStream(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 h-10 text-sm transition-all duration-200" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="year" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Academic Year</Label>
+                  <Input id="year" placeholder="e.g. Final Year" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} className="bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 h-10 text-sm transition-all duration-200" />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="githubUrl" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">GitHub URL</Label>
                 <div className="relative">
-                  <Github className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input id="githubUrl" placeholder="https://github.com/yourusername" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} className="pl-10 bg-muted/20 border-border/40" />
+                  <Github className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
+                  <Input id="githubUrl" placeholder="https://github.com/yourusername" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} className="pl-9 bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 h-10 text-sm transition-all duration-200" />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bio" className="text-xs font-bold">Short Bio</Label>
-                <Textarea id="bio" placeholder="Tell us a little about yourself..." value={bio} onChange={(e) => setBio(e.target.value)} className="min-h-[100px] bg-muted/20 border-border/40" />
+              <div className="space-y-1.5">
+                <Label htmlFor="bio" className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Short Bio</Label>
+                <Textarea id="bio" placeholder="Tell us a little about yourself..." value={bio} onChange={(e) => setBio(e.target.value)} className="min-h-[100px] bg-white/[0.03] border-white/[0.06] focus:border-primary/40 focus:ring-1 focus:ring-primary/20 text-sm resize-none transition-all duration-200" />
               </div>
 
               <div className="pt-2">
-                <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20">
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />} Save Profile
+                <Button onClick={handleSaveProfile} disabled={isSaving} className="bg-primary/90 hover:bg-primary text-primary-foreground font-medium h-9 px-5 text-xs rounded-lg transition-all duration-200 hover:shadow-[0_0_20px_-4px_hsl(var(--primary)_/_0.35)]">
+                  {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />} Save Profile
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
 
-        <motion.div
-           initial={{ opacity: 0, x: 30 }}
-           animate={{ opacity: 1, x: 0 }}
-           transition={{ delay: 0.2, duration: 0.5 }}
-           className="space-y-6"
-        >
-          <Card className="glass-panel">
-            <CardHeader>
-              <CardTitle className="text-xl font-bold flex items-center gap-2"><FileText className="h-5 w-5" /> Resume</CardTitle>
-              <CardDescription>Upload your PDF resume to let our AI extract your skills automatically.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <input type="file" accept=".pdf" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
-                <div onClick={() => !isUploading && fileInputRef.current?.click()} className={`w-full flex items-center justify-center flex-col gap-3 p-6 rounded-xl border-2 border-dashed transition-all ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${resumeFileName ? "bg-primary/5 border-primary/30 text-primary" : "bg-muted/10 border-border/60 text-muted-foreground hover:border-primary/40 hover:bg-background/60"}`}>
-                  {isUploading ? (
-                     <Loader2 className="h-8 w-8 animate-spin" />
-                  ) : resumeFileName ? (
-                     <FileCheck className="h-8 w-8" />
-                  ) : (
-                     <Upload className="h-8 w-8 opacity-70" />
-                  )}
-                  <div className="text-center">
-                    <span className="text-sm font-bold block">{isUploading ? "Analyzing..." : resumeFileName || "Upload PDF"}</span>
-                    {!resumeFileName && !isUploading && <span className="text-[10px] uppercase tracking-widest opacity-60 mt-1 block">Click to browse</span>}
+        {/* Resume sidebar */}
+        <motion.div variants={itemVariants}>
+          <div className="liquid-glass rounded-xl overflow-hidden">
+            <div className="p-5 border-b border-white/[0.04]">
+              <h3 className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" /> Resume
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-1">Upload PDF to extract skills automatically.</p>
+            </div>
+            <div className="p-5">
+              <input type="file" accept=".pdf" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
+              <div
+                onClick={() => !isUploading && fileInputRef.current?.click()}
+                className={`w-full flex items-center justify-center flex-col gap-2.5 p-6 rounded-xl border border-dashed transition-all duration-300 ${
+                  isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                } ${resumeFileName
+                  ? "bg-primary/[0.04] border-primary/20 text-primary"
+                  : "bg-white/[0.02] border-white/[0.08] text-muted-foreground hover:border-primary/25 hover:bg-white/[0.04]"
+                }`}
+              >
+                {isUploading ? (
+                  <Loader2 className="h-7 w-7 animate-spin" />
+                ) : resumeFileName ? (
+                  <FileCheck className="h-7 w-7" />
+                ) : (
+                  <Upload className="h-7 w-7 opacity-60" />
+                )}
+                <div className="text-center">
+                  <span className="text-xs font-medium block">{isUploading ? "Analyzing…" : resumeFileName || "Upload PDF"}</span>
+                  {!resumeFileName && !isUploading && <span className="text-[10px] opacity-50 mt-0.5 block">Click to browse</span>}
+                </div>
+              </div>
+
+              {skills && skills.length > 0 && (
+                <div className="mt-5">
+                  <h4 className="text-[10px] font-medium uppercase tracking-[0.15em] text-muted-foreground/60 mb-2.5">Extracted Skills</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {skills.map((skill, idx) => (
+                      <span key={idx} className="bg-white/[0.04] px-2 py-0.5 rounded-md text-[11px] font-medium text-foreground/70 border border-white/[0.06]">
+                        {skill}
+                      </span>
+                    ))}
                   </div>
                 </div>
-
-                {skills && skills.length > 0 && (
-                  <div className="mt-6">
-                    <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Extracted Skills</h4>
-                    <div className="flex flex-wrap gap-2">
-                       {skills.map((skill, idx) => (
-                         <div key={idx} className="bg-muted px-2.5 py-1 rounded-md text-xs font-medium text-foreground border border-border/40">
-                           {skill}
-                         </div>
-                       ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              )}
+            </div>
+          </div>
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   )
 }
-

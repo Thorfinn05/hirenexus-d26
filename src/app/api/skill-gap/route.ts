@@ -39,6 +39,16 @@ Generate a detailed report in strictly valid JSON format matching this structure
     { "skill": "Product Sense", "has": number, "needs": number },
     { "skill": "Soft Skills", "has": number, "needs": number }
   ], /* Scores out of 10 */
+  "atsKeywords": {
+    "found": ["keyword1", "keyword2", "..."],
+    "missing": ["keyword1", "keyword2", "..."]
+  },
+  /* 
+    ATS Keywords: Analyze the candidate's resume text against the target role "${targetRole || "Software Engineer"}".
+    - "found": List 8-15 ATS-relevant keywords/phrases that ARE present in the resume and align with the target role (e.g. specific technologies, methodologies, certifications, domain terms that ATS systems commonly scan for).
+    - "missing": List 8-15 important ATS keywords/phrases that are MISSING from the resume but are commonly expected for the target role. These should be specific, actionable terms the candidate should incorporate (not vague concepts).
+    Focus on: hard skills, tools, frameworks, methodologies, certifications, industry terms, and action verbs that ATS systems typically filter for.
+  */
   "roadmap": [
     { 
       "phase": "Foundation & Quick Wins", 

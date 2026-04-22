@@ -65,6 +65,50 @@
     --input: 216 34% 17%;
     --ring: 250 84% 65%;
   }
+
+  /* =============================================
+     CANDIDATE THEME — Scoped Design System
+     Soothing Teal/Mint palette with premium glass
+     ============================================= */
+  .candidate-theme {
+    --background: 225 25% 4.5%;
+    --foreground: 210 25% 93%;
+
+    --card: 225 20% 7%;
+    --card-foreground: 210 25% 93%;
+
+    --popover: 225 20% 7%;
+    --popover-foreground: 210 25% 93%;
+
+    --primary: 172 66% 50%;
+    --primary-foreground: 225 25% 4.5%;
+
+    --secondary: 225 18% 11%;
+    --secondary-foreground: 210 25% 93%;
+
+    --muted: 225 16% 11%;
+    --muted-foreground: 218 14% 50%;
+
+    --accent: 172 66% 50%;
+    --accent-foreground: 225 25% 4.5%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 225 14% 13%;
+    --input: 225 14% 13%;
+    --ring: 172 66% 50%;
+
+    --radius: 0.875rem;
+
+    /* Candidate-specific tokens */
+    --glass-bg: 0 0% 100%;
+    --glass-border: 0 0% 100%;
+    --glow-color: 172 66% 50%;
+    --surface-1: 225 20% 7%;
+    --surface-2: 225 18% 9%;
+    --surface-3: 225 16% 12%;
+  }
 }
 
 @layer base {
@@ -79,12 +123,18 @@
     background-attachment: fixed;
   }
 
+  /* Override body background in candidate theme */
+  .candidate-theme body,
+  body.candidate-theme-body {
+    background-image: none;
+  }
+
   ::selection {
     @apply bg-primary/30 text-primary-foreground;
   }
 }
 
-/* Premium Utilities */
+/* Premium Utilities — Recruiter side (kept for backward compat) */
 @layer utilities {
   .glass-panel {
     @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
@@ -113,6 +163,152 @@
   .glow-primary-hover {
     @apply hover:shadow-[0_0_60px_-15px_hsl(var(--primary)_/_0.6)] transition-shadow duration-300;
   }
+
+  /* =============================================
+     CANDIDATE PREMIUM GLASS UTILITIES
+     ============================================= */
+
+  /* Liquid glass surface — primary card component */
+  .liquid-glass {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--glass-bg) / 0.04) 0%,
+      hsl(var(--glass-bg) / 0.02) 50%,
+      hsl(var(--glass-bg) / 0.05) 100%
+    );
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    border: 1px solid hsl(var(--glass-border) / 0.08);
+    box-shadow:
+      0 1px 0 0 hsl(var(--glass-border) / 0.05) inset,
+      0 8px 40px -8px rgba(0, 0, 0, 0.4),
+      0 0 1px 0 hsl(var(--glass-border) / 0.1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .liquid-glass:hover {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--glass-bg) / 0.06) 0%,
+      hsl(var(--glass-bg) / 0.03) 50%,
+      hsl(var(--glass-bg) / 0.07) 100%
+    );
+    border-color: hsl(var(--glass-border) / 0.14);
+    box-shadow:
+      0 1px 0 0 hsl(var(--glass-border) / 0.08) inset,
+      0 16px 64px -12px rgba(0, 0, 0, 0.5),
+      0 0 1px 0 hsl(var(--glass-border) / 0.15);
+  }
+
+  /* Elevated glass — for prominent cards */
+  .liquid-glass-elevated {
+    background: linear-gradient(
+      160deg,
+      hsl(var(--glass-bg) / 0.06) 0%,
+      hsl(var(--glass-bg) / 0.03) 40%,
+      hsl(var(--glass-bg) / 0.07) 100%
+    );
+    backdrop-filter: blur(32px) saturate(1.6);
+    -webkit-backdrop-filter: blur(32px) saturate(1.6);
+    border: 1px solid hsl(var(--glass-border) / 0.1);
+    box-shadow:
+      0 1px 0 0 hsl(var(--glass-border) / 0.06) inset,
+      0 0 0 1px hsl(var(--glass-border) / 0.04),
+      0 24px 64px -16px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .liquid-glass-elevated:hover {
+    border-color: hsl(var(--glass-border) / 0.18);
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 0 hsl(var(--glass-border) / 0.1) inset,
+      0 0 0 1px hsl(var(--glass-border) / 0.06),
+      0 32px 80px -16px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Subtle glass — for sidebar / nav elements */
+  .liquid-glass-subtle {
+    background: hsl(var(--glass-bg) / 0.02);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    border: 1px solid hsl(var(--glass-border) / 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .liquid-glass-subtle:hover {
+    background: hsl(var(--glass-bg) / 0.05);
+    border-color: hsl(var(--glass-border) / 0.1);
+  }
+
+  /* Interactive glass — for buttons, inputs */
+  .liquid-glass-interactive {
+    background: hsl(var(--glass-bg) / 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border) / 0.08);
+    transition: all 0.25s ease;
+  }
+
+  .liquid-glass-interactive:hover {
+    background: hsl(var(--glass-bg) / 0.08);
+    border-color: hsl(var(--primary) / 0.25);
+    box-shadow: 0 0 24px -6px hsl(var(--primary) / 0.15);
+  }
+
+  .liquid-glass-interactive:focus-within {
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.08), 0 0 24px -6px hsl(var(--primary) / 0.2);
+  }
+
+  /* Candidate gradient text */
+  .text-gradient-frost {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--foreground) / 0.6) 100%);
+  }
+
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(172 50% 70%) 100%);
+  }
+
+  /* Ambient orb — for background decoration */
+  .ambient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0;
+    animation: orb-breathe 12s ease-in-out infinite;
+  }
+
+  .ambient-orb-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, hsl(var(--primary) / 0.18) 0%, transparent 70%);
+    top: -15%;
+    left: -10%;
+    animation-delay: 0s;
+  }
+
+  .ambient-orb-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, hsl(200 60% 50% / 0.12) 0%, transparent 70%);
+    bottom: -10%;
+    right: -8%;
+    animation-delay: 4s;
+  }
+
+  .ambient-orb-3 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, hsl(260 50% 55% / 0.08) 0%, transparent 70%);
+    top: 40%;
+    right: 20%;
+    animation-delay: 8s;
+  }
 }
 
 /* Custom Scrollbar for premium feel */
@@ -129,7 +325,21 @@
   @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
 }
 
-/* Base animations */
+/* Candidate theme scrollbar */
+.candidate-theme ::-webkit-scrollbar-thumb {
+  background: hsl(var(--glass-border) / 0.12);
+  border-radius: 999px;
+}
+
+.candidate-theme ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--glass-border) / 0.25);
+}
+
+/* =============================================
+   ANIMATIONS
+   ============================================= */
+
+/* Base animations (recruiter-side compat) */
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -147,4 +357,73 @@
 
 .animate-pulse-slow {
   animation: pulse-slow 8s ease-in-out infinite;
+}
+
+/* Candidate premium animations */
+@keyframes orb-breathe {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1) translate(0, 0);
+  }
+  25% {
+    opacity: 0.7;
+    transform: scale(1.1) translate(20px, -15px);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.95) translate(-10px, 10px);
+  }
+  75% {
+    opacity: 0.65;
+    transform: scale(1.05) translate(15px, 5px);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes border-glow {
+  0%, 100% { border-color: hsl(var(--glass-border) / 0.08); }
+  50% { border-color: hsl(var(--primary) / 0.2); }
+}
+
+.animate-border-glow {
+  animation: border-glow 4s ease-in-out infinite;
+}
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-x {
+  background-size: 200% auto;
+  animation: gradient-x 6s ease-in-out infinite;
+}
+
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-subtle-float {
+  animation: subtle-float 5s ease-in-out infinite;
+}
+
+/* Noise texture overlay for glass surfaces */
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
 }
