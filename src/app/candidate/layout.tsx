@@ -12,25 +12,31 @@ export default function CandidateLayout({
 }>) {
     return (
         <AuthGuard>
-            <SidebarProvider>
-                <CandidateSidebar />
-                <SidebarInset className="flex flex-col h-screen overflow-hidden">
-                    <header className="flex h-16 shrink-0 items-center justify-between px-6 border-b border-border/40 bg-background/50 backdrop-blur-md sticky top-0 z-10">
-                        <div className="flex items-center gap-6 flex-1">
-                            <SidebarTrigger className="h-9 w-9 text-muted-foreground hover:text-foreground transition-colors" />
-                            {/* Option to show/hide global search for candidates, leaving it for now */}
-                            <GlobalSearch />
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <ThemeToggle />
-                            <UserNav />
-                        </div>
-                    </header>
-                    <main className="flex-1 overflow-y-auto p-6">
-                        {children}
-                    </main>
-                </SidebarInset>
-            </SidebarProvider>
+            <div className="candidate-theme">
+                <SidebarProvider>
+                    <CandidateSidebar />
+                    <SidebarInset className="flex flex-col h-screen overflow-hidden relative">
+                        {/* Ambient aurora orbs */}
+                        <div className="ambient-orb ambient-orb-1" />
+                        <div className="ambient-orb ambient-orb-2" />
+                        <div className="ambient-orb ambient-orb-3" />
+
+                        <header className="flex h-14 shrink-0 items-center justify-between px-6 border-b border-white/[0.06] bg-background/80 backdrop-blur-xl sticky top-0 z-20">
+                            <div className="flex items-center gap-5 flex-1">
+                                <SidebarTrigger className="h-8 w-8 text-muted-foreground hover:text-foreground transition-colors duration-200" />
+                                <GlobalSearch />
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <ThemeToggle />
+                                <UserNav />
+                            </div>
+                        </header>
+                        <main className="flex-1 overflow-y-auto p-6 relative z-10">
+                            {children}
+                        </main>
+                    </SidebarInset>
+                </SidebarProvider>
+            </div>
         </AuthGuard>
     );
 }
