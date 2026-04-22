@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import { 
   CheckCircle, BookOpen, ExternalLink, Calendar, 
-  Zap, Award, Code, Globe, Lightbulb
+  Zap, Award, Code, Globe, Lightbulb, Search, X, ShieldCheck, Check
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -74,7 +74,130 @@ export function SkillGapDashboard({ report }: SkillGapDashboardProps) {
         </Card>
       </section>
 
-      {/* 2. Prioritized Learning Roadmap (Timeline) */}
+      {/* 2. ATS Keyword Optimization */}
+      {report.atsKeywords && (report.atsKeywords.found?.length > 0 || report.atsKeywords.missing?.length > 0) && (
+        <section className="space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="space-y-2">
+              <Badge className="bg-amber-500/20 text-amber-400 border-none px-3 py-1 text-xs">ATS Optimization</Badge>
+              <h2 className="text-3xl font-bold font-headline">Keyword Scanner</h2>
+              <p className="text-muted-foreground max-w-xl">
+                ATS systems filter resumes by matching keywords to the job description. Here's how your resume stacks up for <span className="text-primary font-medium">{report.summary?.match(/target role/i) ? 'the target role' : 'this role'}</span>.
+              </p>
+            </div>
+            {(() => {
+              const found = report.atsKeywords!.found?.length || 0;
+              const missing = report.atsKeywords!.missing?.length || 0;
+              const total = found + missing;
+              const pct = total > 0 ? Math.round((found / total) * 100) : 0;
+              return (
+                <div className="flex items-center gap-4 shrink-0">
+                  <div className="relative h-20 w-20">
+                    <svg className="h-20 w-20 -rotate-90" viewBox="0 0 80 80">
+                      <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="5" className="text-white/[0.06]" />
+                      <circle
+                        cx="40" cy="40" r="34" fill="none"
+                        stroke={pct >= 70 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444'}
+                        strokeWidth="5"
+                        strokeDasharray={`${2 * Math.PI * 34}`}
+                        strokeDashoffset={`${2 * Math.PI * 34 * (1 - pct / 100)}`}
+                        strokeLinecap="round"
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-lg font-bold text-foreground/90">{pct}%</span>
+                    </div>
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-foreground/80">Match Rate</p>
+                    <p className="text-[11px] text-muted-foreground">{found} of {total} keywords found</p>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Found Keywords */}
+            <Card className="glass-panel border-emerald-500/10 bg-emerald-500/[0.03] overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                    <ShieldCheck className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base text-emerald-400">Found in Resume</CardTitle>
+                    <CardDescription className="text-xs">These ATS keywords are already present</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {report.atsKeywords!.found?.map((kw, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.03 }}
+                    >
+                      <Badge
+                        className="bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors cursor-default px-3 py-1.5 text-xs font-medium gap-1.5"
+                      >
+                        <Check className="h-3 w-3" />
+                        {kw}
+                      </Badge>
+                    </motion.div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Missing Keywords */}
+            <Card className="glass-panel border-rose-500/10 bg-rose-500/[0.03] overflow-hidden">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-rose-500/15 flex items-center justify-center">
+                    <Search className="h-5 w-5 text-rose-400" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base text-rose-400">Missing from Resume</CardTitle>
+                    <CardDescription className="text-xs">Add these keywords to improve ATS ranking</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {report.atsKeywords!.missing?.map((kw, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.03 }}
+                    >
+                      <Badge
+                        className="bg-rose-500/10 text-rose-300 border border-rose-500/20 hover:bg-rose-500/20 transition-colors cursor-default px-3 py-1.5 text-xs font-medium gap-1.5"
+                      >
+                        <X className="h-3 w-3" />
+                        {kw}
+                      </Badge>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 rounded-lg bg-amber-500/[0.06] border border-amber-500/10">
+                  <p className="text-[11px] text-amber-300/80 leading-relaxed">
+                    <span className="font-semibold">💡 Pro tip:</span> Don't just add these keywords blindly — use the roadmap and resources below to genuinely build these skills, then weave them naturally into your resume's experience descriptions.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      {/* 3. Prioritized Learning Roadmap (Timeline) */}
       <section className="space-y-8">
         <div className="text-center space-y-2">
           <Badge className="bg-purple-500/20 text-purple-400 border-none px-3 py-1 text-xs">Strategic Timeline</Badge>
@@ -135,7 +258,7 @@ export function SkillGapDashboard({ report }: SkillGapDashboardProps) {
         </div>
       </section>
 
-      {/* 3. Suggested Resources */}
+      {/* 4. Suggested Resources */}
       <section className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">

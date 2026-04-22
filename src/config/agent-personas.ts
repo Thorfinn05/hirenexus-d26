@@ -58,6 +58,10 @@ export interface SkillGapReport {
   chartData: { skill: string; has: number; needs: number }[];
   roadmap: { phase: string; duration: string; tasks: string[]; priority: 'low' | 'medium' | 'high' }[];
   resources: { type: 'course' | 'project' | 'certification'; name: string; description: string; link?: string; priority: 'recommended' | 'essential' }[];
+  atsKeywords?: {
+    found: string[];
+    missing: string[];
+  };
   summary: string;
 }
 
