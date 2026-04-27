@@ -188,7 +188,7 @@ function RoadmapTimeline({ roadmap }: { roadmap: SkillGapReport['roadmap'] }) {
   });
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-8" id="learning-roadmap">
       {/* Header */}
       <motion.div
         ref={headerRef}
@@ -236,7 +236,7 @@ export function SkillGapDashboard({ report }: SkillGapDashboardProps) {
   return (
     <div className="space-y-12">
       {/* 1. Visual Gap Analysis (Radar Chart) */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center" id="visual-gap-analysis">
         <div className="space-y-4">
           <Badge className="bg-primary/20 text-primary border-none px-3 py-1 text-xs">Visual Gap Analysis</Badge>
           <h2 className="text-3xl font-bold font-headline">Has vs. Needs</h2>
@@ -287,7 +287,7 @@ export function SkillGapDashboard({ report }: SkillGapDashboardProps) {
 
       {/* 2. ATS Keyword Optimization */}
       {report.atsKeywords && (report.atsKeywords.found?.length > 0 || report.atsKeywords.missing?.length > 0) && (
-        <section className="space-y-8">
+        <section className="space-y-8" id="keyword-scanner">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
               <Badge className="bg-amber-500/20 text-amber-400 border-none px-3 py-1 text-xs">ATS Optimization</Badge>
@@ -412,7 +412,7 @@ export function SkillGapDashboard({ report }: SkillGapDashboardProps) {
       <RoadmapTimeline roadmap={report.roadmap} />
 
       {/* 4. Suggested Resources */}
-      <section className="space-y-8">
+      <section className="space-y-8" id="recommended-resources">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-2">
             <Badge className="bg-blue-500/20 text-blue-400 border-none px-3 py-1 text-xs">Curated Learning Path</Badge>

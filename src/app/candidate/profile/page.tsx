@@ -235,7 +235,7 @@ export default function CandidateProfile() {
         </motion.div>
 
         {/* Resume sidebar */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} id="upload-resume">
           <div className="liquid-glass rounded-xl overflow-hidden">
             <div className="p-5 border-b border-white/[0.04]">
               <h3 className="text-sm font-semibold text-foreground/90 flex items-center gap-2">

@@ -240,7 +240,7 @@ export default function CandidateGithubDashboard() {
       </motion.div>
 
       {analysisData && analysisData.data && (
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6" id="github-analysis">
           
           {/* Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -359,7 +359,7 @@ export default function CandidateGithubDashboard() {
           </div>
 
           {/* Project Recommendations */}
-          <div className="space-y-5 pt-8 border-t border-white/[0.04]">
+          <div className="space-y-5 pt-8 border-t border-white/[0.04]" id="project-recommendations">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Sparkles className="h-5 w-5 text-primary" />

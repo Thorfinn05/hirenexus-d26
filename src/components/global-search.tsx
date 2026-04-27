@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, FileText, Users, Briefcase, BrainCircuit, ArrowRight, X } from "lucide-react"
+import { Search, FileText, Users, Briefcase, BrainCircuit, ArrowRight, X, LayoutDashboard, User, Map, Github, Video, Upload, BarChart, Target } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -15,6 +15,22 @@ import { Badge } from "@/components/ui/badge"
 
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
+
+const staticNavigations = [
+  { id: 'nav-dashboard', title: 'Candidate Dashboard', type: 'Navigation', category: 'candidate/dashboard', icon: LayoutDashboard, keywords: ['home', 'dashboard', 'start', 'main'], isNav: true },
+  { id: 'nav-profile', title: 'My Profile', type: 'Navigation', category: 'candidate/profile', icon: User, keywords: ['profile', 'account', 'settings', 'details', 'my info'], isNav: true },
+  { id: 'nav-upload-resume', title: 'Upload Resume', type: 'Feature', category: 'candidate/profile#upload-resume', icon: Upload, keywords: ['upload', 'resume', 'cv', 'document', 'pdf', 'add resume', 'upload pdf'], isNav: true },
+  { id: 'nav-resume', title: 'AI Resume Panel', type: 'Navigation', category: 'candidate/resume-analysis', icon: FileText, keywords: ['resume', 'analysis', 'panel', 'feedback', 'review'], isNav: true },
+  { id: 'nav-hiring-panel', title: 'Hiring Panel Evaluation', type: 'Feature', category: 'candidate/resume-analysis#hiring-panel-evaluation', icon: Users, keywords: ['hiring', 'panel', 'evaluation', 'feedback', 'review', 'consensus'], isNav: true },
+  { id: 'nav-skill', title: 'Skill Gap & Roadmap', type: 'Navigation', category: 'candidate/skill-gap', icon: Map, keywords: ['roadmap', 'skills', 'gap', 'learn', 'path', 'course'], isNav: true },
+  { id: 'nav-keyword-scanner', title: 'ATS Keyword Scanner', type: 'Feature', category: 'candidate/skill-gap#keyword-scanner', icon: Search, keywords: ['keyword', 'scanner', 'ats', 'missing', 'found', 'optimize'], isNav: true },
+  { id: 'nav-visual-gap', title: 'Visual Gap Analysis', type: 'Feature', category: 'candidate/skill-gap#visual-gap-analysis', icon: BarChart, keywords: ['visual', 'gap', 'analysis', 'chart', 'radar'], isNav: true },
+  { id: 'nav-learning-roadmap', title: 'Learning Roadmap Timeline', type: 'Feature', category: 'candidate/skill-gap#learning-roadmap', icon: Map, keywords: ['learning', 'roadmap', 'timeline', 'path'], isNav: true },
+  { id: 'nav-recommended-resources', title: 'Recommended Resources', type: 'Feature', category: 'candidate/skill-gap#recommended-resources', icon: Target, keywords: ['recommended', 'resources', 'course', 'book', 'learn'], isNav: true },
+  { id: 'nav-github', title: 'GitHub Analysis & Projects', type: 'Navigation', category: 'candidate/github', icon: Github, keywords: ['github', 'project', 'recommendation', 'code', 'repo', 'repository', 'analysis'], isNav: true },
+  { id: 'nav-project-recs', title: 'Project Recommendations', type: 'Feature', category: 'candidate/github#project-recommendations', icon: Briefcase, keywords: ['project', 'recommendation', 'portfolio', 'idea', 'github'], isNav: true },
+  { id: 'nav-mock', title: 'Mock Interviews', type: 'Navigation', category: 'candidate/mock-interview', icon: Video, keywords: ['mock', 'interview', 'practice', 'video', 'camera', 'questions'], isNav: true },
+]
 
 export function GlobalSearch() {
   const [open, setOpen] = React.useState(false)
@@ -38,20 +54,20 @@ export function GlobalSearch() {
   const { data: jobs } = useCollection(jobsQuery)
 
   const searchData = React.useMemo(() => {
-    const data: any[] = []
+    const data: any[] = [...staticNavigations]
     if (candidates) {
       candidates.forEach((c: any) => {
-        data.push({ id: c.id, title: c.fullName, type: "Candidate", category: "candidates", icon: Users })
+        data.push({ id: c.id, title: c.fullName, type: "Candidate", category: "candidates", icon: Users, isNav: false })
         if (c.status === "Evaluated") {
-          data.push({ id: c.id, title: `Report: ${c.fullName}`, type: "Report", category: "reports", icon: FileText })
+          data.push({ id: c.id, title: `Report: ${c.fullName}`, type: "Report", category: "reports", icon: FileText, isNav: false })
         } else if (c.status === "Parsed" || c.status === "In Debate") {
-          data.push({ id: c.id, title: `Evaluate: ${c.fullName}`, type: "Evaluation", category: "evaluate", icon: BrainCircuit })
+          data.push({ id: c.id, title: `Evaluate: ${c.fullName}`, type: "Evaluation", category: "evaluate", icon: BrainCircuit, isNav: false })
         }
       })
     }
     if (jobs) {
       jobs.forEach((j: any) => {
-        data.push({ id: j.id, title: j.title || j.roleName || "Untitled Job", type: "Job", category: "jobs", icon: Briefcase })
+        data.push({ id: j.id, title: j.title || j.roleName || "Untitled Job", type: "Job", category: "jobs", icon: Briefcase, isNav: false })
       })
     }
     return data
@@ -59,10 +75,13 @@ export function GlobalSearch() {
 
   const filteredResults = React.useMemo(() => {
     if (!queryText || queryText.length < 2) return []
-    return searchData.filter(item =>
-      item.title?.toLowerCase().includes(queryText.toLowerCase()) ||
-      item.type?.toLowerCase().includes(queryText.toLowerCase())
-    )
+    const lowerQuery = queryText.toLowerCase()
+    return searchData.filter(item => {
+      const matchTitle = item.title?.toLowerCase().includes(lowerQuery)
+      const matchType = item.type?.toLowerCase().includes(lowerQuery)
+      const matchKeyword = item.keywords?.some((kw: string) => kw.toLowerCase().includes(lowerQuery))
+      return matchTitle || matchType || matchKeyword
+    })
   }, [queryText, searchData])
 
   // Handle keyboard shortcuts
@@ -87,7 +106,7 @@ export function GlobalSearch() {
             <Input
               id="global-search-input"
               type="text"
-              placeholder="Search (⌘+K)"
+              placeholder="Search features, pages, or candidates... (⌘+K)"
               className="w-full bg-muted/30 border-border/40 rounded-xl pl-10 pr-12 py-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:bg-muted/50 transition-all placeholder:text-muted-foreground/60 h-11"
               value={queryText}
               onChange={(e) => {
@@ -135,7 +154,33 @@ export function GlobalSearch() {
                       key={`${result.category}-${result.id}`}
                       className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-primary/5 transition-all text-left group/item border border-transparent hover:border-primary/10"
                       onClick={() => {
-                        router.push(`/${result.category}/${result.id}`)
+                        if (result.isNav) {
+                          const fullPath = `/${result.category}`
+                          router.push(fullPath)
+
+                          const hashParts = result.category.split('#')
+                          if (hashParts.length > 1) {
+                            const hash = hashParts[1]
+                            const tryScroll = (attempts = 0) => {
+                              const el = document.getElementById(hash)
+                              if (el) {
+                                // Add a little offset for floating headers if any, or just start
+                                el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                                // Optional: highlight the element briefly
+                                el.classList.add('ring-2', 'ring-primary', 'ring-offset-4', 'ring-offset-background', 'transition-all', 'duration-500')
+                                setTimeout(() => {
+                                  el.classList.remove('ring-2', 'ring-primary', 'ring-offset-4', 'ring-offset-background')
+                                }, 2000)
+                              } else if (attempts < 10) {
+                                setTimeout(() => tryScroll(attempts + 1), 500)
+                              }
+                            }
+                            // Start polling for the element to appear
+                            setTimeout(() => tryScroll(0), 100)
+                          }
+                        } else {
+                          router.push(`/${result.category}/${result.id}`)
+                        }
                         setOpen(false)
                         setQueryText("")
                       }}

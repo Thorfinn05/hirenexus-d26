@@ -254,7 +254,7 @@ The candidate wants to be evaluated for the above position.`
       )}
 
       {analysisData && !isAnalyzing && (
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 mt-8 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 mt-8 items-start" id="hiring-panel-evaluation">
           <motion.div
             initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
