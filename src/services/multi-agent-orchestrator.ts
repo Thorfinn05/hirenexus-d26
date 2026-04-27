@@ -195,6 +195,7 @@ Keep your response to 2-3 sentences. Be specific and cite the resume.`;
       return {
         agentId: agent.id,
         agentName: agent.name,
+        agentRole: agent.role,
         message: text.trim(),
         type: 'critique',
         timestamp: Date.now()

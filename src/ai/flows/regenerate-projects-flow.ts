@@ -4,9 +4,9 @@ import { fetchGithubGQL } from "./fetch-github-gql-flow"
 
 // The 3 Groq models to use in fallback order (exactly as specified)
 const PROJECT_RECOMMENDATION_MODELS = [
+  'groq/openai/gpt-oss-120b',
   'groq/llama-3.3-70b-versatile',
   'groq/meta-llama/llama-4-scout-17b-16e-instruct',
-  'groq/openai/gpt-oss-120b',
 ] as const;
 
 const ProjectRecommendationSchema = z.array(z.object({

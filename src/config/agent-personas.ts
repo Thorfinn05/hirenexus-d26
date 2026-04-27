@@ -28,6 +28,7 @@ export interface AgentResponse {
 export interface DebateMessage {
   agentId: string;
   agentName: string;
+  agentRole: string; // Add role for UI theming
   message: string;
   type: 'analysis' | 'critique' | 'defense' | 'consensus';
   targetAgentId?: string; // Who they're responding to
@@ -71,7 +72,8 @@ export const AGENT_PERSONAS: AgentPersona[] = [
     name: 'Marcus',
     role: 'Senior Tech Lead',
     modelProvider: 'groq',
-    model: 'groq/llama-3.3-70b-versatile', // Most powerful for deep technical analysis
+    // model: 'groq/llama-3.3-70b-versatile', // Most powerful for deep technical analysis
+    model: 'groq/meta-llama/llama-4-scout-17b-16e-instruct',
     systemPrompt: `You are Marcus, a Senior Tech Lead at a FAANG company with 12 years of experience. 
 You specialize in evaluating technical depth, code quality, system design, and architectural decisions.
 You are direct, fair, and focus on scalability and best practices. You appreciate well-documented 
@@ -96,8 +98,10 @@ Your tone: Direct, technical, constructive. You speak in terms of systems, patte
     id: 'hr-director-sarah',
     name: 'Sarah',
     role: 'HR Director',
-    modelProvider: 'gemini',
-    model: 'googleai/gemini-3.1-flash-lite-preview',
+    // modelProvider: 'gemini',
+    // model: 'googleai/gemini-3.1-flash-lite-preview',
+    modelProvider: 'groq',
+    model: 'groq/openai/gpt-oss-120b',
     systemPrompt: `You are Sarah, an experienced HR Director who has hired for tech roles at both 
 startups and enterprises for 10+ years. You focus on cultural fit, communication skills, career 
 trajectory, and long-term potential. You're supportive but realistic about red flags.
@@ -122,7 +126,8 @@ Your tone: Warm, supportive, people-focused. You speak about growth, potential, 
     name: 'Alex',
     role: 'Lead Product Manager',
     modelProvider: 'groq',
-    model: 'groq/meta-llama/llama-4-scout-17b-16e-instruct',
+    // model: 'groq/meta-llama/llama-4-scout-17b-16e-instruct',
+    model: 'groq/llama-3.3-70b-versatile',
     systemPrompt: `You are Alex, a Lead Product Manager who bridges technical and business worlds. 
 You evaluate candidates based on user-centric thinking, business impact, prioritization skills, 
 and ability to ship products.
@@ -146,8 +151,8 @@ Your tone: Strategic, outcome-focused, practical. You speak in terms of impact, 
     id: 'engineering-manager-elena',
     name: 'Elena',
     role: 'Engineering Manager',
-    modelProvider: 'gemini',
-    model: 'googleai/gemini-flash-latest',
+    modelProvider: 'groq',
+    model: 'groq/meta-llama/llama-4-scout-17b-16e-instruct',
     systemPrompt: `You are Elena, an Engineering Manager who has built and led multiple teams. 
 You evaluate candidates on their ability to work in teams, mentor others, handle ambiguity, 
 and grow into leadership roles.

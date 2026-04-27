@@ -81,7 +81,8 @@ Focus on bridging the specific gap areas mentioned by the panel. Be specific wit
     try {
       // Primary: Gemini 3.1 Flash Lite
       const { text } = await ai.generate({
-        model: 'googleai/gemini-3.1-flash-lite-preview',
+        // model: 'googleai/gemini-3.1-flash-lite-preview',
+        model: 'groq/openai/gpt-oss-120b',
         prompt,
         config: { temperature: 0.4 }
       });
@@ -91,7 +92,8 @@ Focus on bridging the specific gap areas mentioned by the panel. Be specific wit
       try {
         // Fallback 1: GPT-OSS-120B
         const { text } = await ai.generate({
-          model: 'groq/openai/gpt-oss-120b',
+          // model: 'groq/openai/gpt-oss-120b',
+          model: 'groq/llama-3.3-70b-versatile',
           prompt,
           config: { temperature: 0.4 }
         });
@@ -101,7 +103,8 @@ Focus on bridging the specific gap areas mentioned by the panel. Be specific wit
         try {
           // Fallback 2: Llama 3.3
           const { text } = await ai.generate({
-            model: 'groq/llama-3.3-70b-versatile',
+            // model: 'groq/llama-3.3-70b-versatile',
+            model: 'googleai/gemini-3.1-flash-lite-preview',
             prompt,
             config: { temperature: 0.4 }
           });
