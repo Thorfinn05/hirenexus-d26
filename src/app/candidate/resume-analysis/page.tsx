@@ -46,11 +46,18 @@ export default function ResumeAnalysisDashboard() {
   const [analysisHistory, setAnalysisHistory] = React.useState<any[]>([])
   const [selectedHistoryIndex, setSelectedHistoryIndex] = React.useState(0)
   const [analysisData, setAnalysisData] = React.useState<any>(null)
+  const [isTerminalComplete, setIsTerminalComplete] = React.useState(false)
+  const [isDataReady, setIsDataReady] = React.useState(false)
+  const [pendingAnalysisEntry, setPendingAnalysisEntry] = React.useState<any>(null)
 
   const [localTargetRole, setLocalTargetRole] = React.useState("")
   const [localExperience, setLocalExperience] = React.useState("")
   const [localLinkedin, setLocalLinkedin] = React.useState("")
   const [localGithub, setLocalGithub] = React.useState("")
+
+  const handleTerminalComplete = React.useCallback(() => {
+    setIsTerminalComplete(true)
+  }, [])
 
   React.useEffect(() => {
     if (isUserLoading || !user || !db) return;
@@ -101,6 +108,10 @@ export default function ResumeAnalysisDashboard() {
     }
 
     setIsAnalyzing(true)
+    setIsTerminalComplete(false)
+    setIsDataReady(false)
+    setPendingAnalysisEntry(null)
+
     try {
       let githubData = "No GitHub URL provided"
       if (localGithub) {
@@ -136,30 +147,50 @@ The candidate wants to be evaluated for the above position.`
              github: localGithub
            }
          };
-
-         const updatedHistory = [newAnalysisEntry, ...analysisHistory].slice(0, 2);
-         setAnalysisHistory(updatedHistory);
-         setAnalysisData(data.data);
-         setSelectedHistoryIndex(0);
          
-         toast({ title: "Analysis Complete", description: "The agent panel has reached a consensus." })
-         
-         if(user && db) {
-           const docRef = doc(db, "users", user.uid)
-           await updateDoc(docRef, { 
-             analysisHistory: updatedHistory,
-             targetRole: localTargetRole 
-           })
-         }
+         setPendingAnalysisEntry(newAnalysisEntry)
+         setIsDataReady(true)
       } else {
          throw new Error(data.error)
       }
     } catch (e: any) {
       toast({ variant: "destructive", title: "Analysis Failed", description: e.message || "Failed to analyze" })
-    } finally {
       setIsAnalyzing(false)
     }
   }
+
+  React.useEffect(() => {
+    const finalizeAnalysis = async () => {
+      if (isAnalyzing && isDataReady && isTerminalComplete && pendingAnalysisEntry) {
+        const updatedHistory = [pendingAnalysisEntry, ...analysisHistory].slice(0, 2);
+        setAnalysisHistory(updatedHistory);
+        setAnalysisData(pendingAnalysisEntry.analysisData);
+        setSelectedHistoryIndex(0);
+        
+        toast({ title: "Analysis Complete", description: "The agent panel has reached a consensus." })
+        
+        // Reset states
+        setIsAnalyzing(false);
+        setIsDataReady(false);
+        setIsTerminalComplete(false);
+        setPendingAnalysisEntry(null);
+
+        if(user && db) {
+          try {
+            const docRef = doc(db, "users", user.uid)
+            await updateDoc(docRef, { 
+              analysisHistory: updatedHistory,
+              targetRole: localTargetRole 
+            })
+          } catch (error) {
+            console.error("Error updating firestore:", error)
+          }
+        }
+      }
+    }
+    
+    finalizeAnalysis()
+  }, [isAnalyzing, isDataReady, isTerminalComplete, pendingAnalysisEntry, user, db, localTargetRole, analysisHistory, toast])
 
   if (isUserLoading || isLoading) {
     return (
@@ -245,7 +276,7 @@ The candidate wants to be evaluated for the above position.`
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <AILoadingTerminal />
+                  <AILoadingTerminal onComplete={handleTerminalComplete} />
                 </motion.div>
               )}
             </div>

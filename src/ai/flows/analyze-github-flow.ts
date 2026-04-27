@@ -2,6 +2,13 @@ import { ai } from "../genkit"
 import { z } from "zod"
 import { fetchGithubGQL } from "./fetch-github-gql-flow"
 
+// The 3 Groq models to use in fallback order (exactly as specified)
+const GITHUB_ANALYSIS_MODELS = [
+  'groq/llama-3.3-70b-versatile',
+  'groq/openai/gpt-oss-120b',
+  'groq/meta-llama/llama-4-scout-17b-16e-instruct',
+] as const;
+
 const GithubAnalysisSchema = z.object({
   techBreadth: z.array(z.object({
     language: z.string(),
@@ -102,18 +109,42 @@ export async function analyzeGithubPortfolio(githubUrl: string, context?: { targ
          - Set 'isLevelUp' to true if it directly builds upon an existing repo field they already have.
     `
 
-    // 4. Generate Structured Output using Genkit + Groq
-    const { output } = await ai.generate({
-      model: 'groq/llama-3.3-70b-versatile',
-      prompt: aiPrompt,
-      output: {
-        schema: GithubAnalysisSchema,
-      },
-    })
+    // 4. Generate Structured Output using Genkit + Groq Fallback Chain
+    let finalOutput = null
+    let modelUsed = ""
+    let lastError = null
+
+    for (const model of GITHUB_ANALYSIS_MODELS) {
+      try {
+        console.log(`[Github Analysis] Trying model: ${model}`)
+        const { output } = await ai.generate({
+          model,
+          prompt: aiPrompt,
+          output: {
+            schema: GithubAnalysisSchema,
+          },
+        })
+        
+        if (output) {
+          finalOutput = output
+          modelUsed = model
+          console.log(`[Github Analysis] Success with model: ${model}`)
+          break
+        }
+      } catch (error: any) {
+        console.warn(`[Github Analysis] Model ${model} failed:`, error.message)
+        lastError = error
+      }
+    }
+
+    if (!finalOutput) {
+      throw lastError || new Error("All Groq models failed to analyze GitHub portfolio.")
+    }
 
     return {
       success: true,
-      data: output,
+      data: finalOutput,
+      modelUsed,
       rawUsername: username,
       rawContributions: gqlData.contributionsCollection.contributionCalendar.totalContributions,
       rawReposCount: gqlData.repositories.nodes.length
