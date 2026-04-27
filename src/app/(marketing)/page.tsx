@@ -16,21 +16,21 @@ import {
 } from "lucide-react"
 
 const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
-  }
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+    }
 }
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 24, filter: "blur(6px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
-  }
+    hidden: { opacity: 0, y: 24, filter: "blur(6px)" },
+    visible: {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] }
+    }
 }
 
 export default function LandingPage() {
@@ -53,7 +53,7 @@ export default function LandingPage() {
             <div className="ambient-orb ambient-orb-3" />
 
             {/* Navigation */}
-            <motion.nav 
+            <motion.nav
                 initial={{ y: -80, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
@@ -88,7 +88,7 @@ export default function LandingPage() {
             </motion.nav>
 
             {/* Hero Section */}
-            <motion.section 
+            <motion.section
                 style={{ y, opacity, scale }}
                 className="relative pt-36 md:pt-48 pb-24 flex flex-col items-center justify-center min-h-[88vh] text-center z-10 px-6"
             >
@@ -105,7 +105,7 @@ export default function LandingPage() {
                         </span>
                     </motion.div>
 
-                    <motion.h1 
+                    <motion.h1
                         variants={itemVariants}
                         className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.95] mb-5 text-foreground/95"
                     >
@@ -113,11 +113,11 @@ export default function LandingPage() {
                         <span className="text-gradient-primary">Intelligence</span>
                     </motion.h1>
 
-                    <motion.p 
+                    <motion.p
                         variants={itemVariants}
                         className="text-base md:text-lg text-muted-foreground font-medium max-w-2xl leading-relaxed mb-10"
                     >
-                        Deploy a council of specialized AI agents to evaluate engineers, 
+                        Deploy a council of specialized AI agents to evaluate engineers,
                         eliminating bias and uncovering elite talent instantly.
                     </motion.p>
 
@@ -129,7 +129,7 @@ export default function LandingPage() {
                     </motion.div>
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 1.2, duration: 1 }}
@@ -143,7 +143,7 @@ export default function LandingPage() {
             {/* Features Section */}
             <section className="relative py-24 z-20 border-t border-white/[0.04]">
                 <div className="container mx-auto px-6 max-w-6xl">
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-80px" }}
@@ -159,19 +159,19 @@ export default function LandingPage() {
                     </motion.div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <FeatureCard 
+                        <FeatureCard
                             delay={0.1}
                             icon={Users}
                             title="Multi-Agent Consensus"
                             description="Synchronized AI agents—Technical, Behavioral, and Diversity—collaborating to reach structural consensus."
                         />
-                        <FeatureCard 
+                        <FeatureCard
                             delay={0.2}
                             icon={MessageSquare}
                             title="Real-time Deliberation"
                             description="Observe agents debate candidate merits in real-time, providing transparent insights into hiring conclusions."
                         />
-                        <FeatureCard 
+                        <FeatureCard
                             delay={0.3}
                             icon={ShieldCheck}
                             title="Zero-Bias Filtration"
@@ -183,7 +183,7 @@ export default function LandingPage() {
 
             {/* CTA Section */}
             <section className="relative py-28 z-20">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -193,11 +193,11 @@ export default function LandingPage() {
                     <div className="liquid-glass-elevated rounded-2xl p-12 md:p-16 text-center relative overflow-hidden">
                         {/* Subtle top border accent */}
                         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                        
+
                         <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-foreground/95 leading-tight">
                             Elevate Your<br className="hidden md:block" /> Pipeline Today.
                         </h2>
-                        
+
                         <Link href={user ? "/dashboard" : "/login"}>
                             <button className="px-8 py-3.5 bg-foreground/90 text-background rounded-xl text-base font-medium hover:bg-foreground transition-all duration-300 hover:shadow-[0_0_40px_-8px_rgba(255,255,255,0.2)]">
                                 Deploy AI Council
@@ -207,21 +207,14 @@ export default function LandingPage() {
                 </motion.div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-10 border-t border-white/[0.04] relative z-20 text-center">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                    <BrainCircuit className="h-4 w-4 text-primary/60" />
-                    <span className="text-base font-semibold text-foreground/60">HireNexus</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground/30 font-medium">© {new Date().getFullYear()} HireNexus v2.0. All rights reserved.</p>
-            </footer>
+            {/* Old Footer removed as new global footer is used */}
         </div>
     )
 }
 
 function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, title: string, description: string, delay: number }) {
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
